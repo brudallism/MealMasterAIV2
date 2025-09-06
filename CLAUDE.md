@@ -17,7 +17,7 @@ The project uses TypeScript with strict mode enabled. ESLint and Prettier are co
 
 ### Technology Stack
 - **Framework**: React Native with Expo (~53.0.22)
-- **Navigation**: Expo Router with React Navigation bottom tabs
+- **Navigation**: React Navigation with bottom tabs
 - **State Management**: Zustand for global state
 - **Data Fetching**: TanStack React Query
 - **Chat Interface**: React Native Gifted Chat
