@@ -1,5 +1,6 @@
 import { openAIClient } from './openai-client';
 import { useAIStore } from '../../stores/ai-store';
+import { foodRecognitionAI, FoodRecognitionInput, FoodRecognitionResponse } from './food-recognition-ai';
 import OpenAI from 'openai';
 
 // Intent classification types from User Facing AI Guide
@@ -331,10 +332,21 @@ For V0.1, respond to all food logging attempts with encouraging confirmation and
     
     // Food logging patterns from guide (lines 221-234)
     const foodLoggingPatterns = [
+      // Explicit eating verbs
       /\bi (ate|had|consumed|finished|just ate|just had)\b/,
       /\bfor (breakfast|lunch|dinner|snack)\b/,
       /\bjust (finished|ate|had)\b/,
-      /\b(ate|had) .* for\b/
+      /\b(ate|had) .* for\b/,
+      // Direct food descriptions (quantities + foods)
+      /\b\d+\s*(oz|ounce|ounces|gram|grams|g|lb|lbs|pound|pounds|cup|cups|slice|slices|piece|pieces)\s+/,
+      // Common food words that indicate logging intent
+      /\b(chicken|beef|pork|fish|salmon|tuna|pasta|rice|bread|salad|pizza|burger|sandwich|steak|eggs?|cheese|yogurt|fruit|vegetable|beans?|nuts?)\b/,
+      // Food descriptors that suggest logging
+      /\b(grilled|baked|fried|steamed|boiled|roasted|sauteed|fresh|cooked)\b.*\b(chicken|beef|fish|vegetables?|rice|pasta)\b/,
+      // Portion indicators
+      /\bsome\s+(kind\s+of\s+)?(chicken|beef|fish|pasta|rice|pizza|salad|stir.fry)/,
+      // Meal structure phrases
+      /\b(stir.fry|pasta.+sauce|chicken.+rice|salad.+dressing)\b/
     ];
     
     // Progress check patterns (lines 235-248) 
@@ -563,16 +575,31 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
     return responses[Math.floor(Math.random() * responses.length)];
   }
 
-  // Main template routing method
-  private generateTemplateResponse(intent: IntentType, userMessage: string): { response: string, templateUsed: string } {
+  // Main template routing method - now async to handle Food Recognition AI
+  private async generateTemplateResponse(intent: IntentType, userMessage: string, userId: string): Promise<{ response: string, templateUsed: string } | null> {
     switch (intent) {
       case 'food_logging':
-        const nutritionData = this.mockFoodRecognition(userMessage);
-        const progressData = this.mockProgressData();
-        return {
-          response: this.generateFoodLoggingResponse(nutritionData, progressData),
-          templateUsed: 'food_logging_success'
-        };
+        // Use real Food Recognition AI instead of mock
+        const foodRecognitionResult = await this.processWithFoodRecognitionAI(userMessage, userId);
+        
+        if (foodRecognitionResult.requiresClarification) {
+          // Return clarification request
+          return {
+            response: foodRecognitionResult.clarificationMessage || 'Could you provide more details about your meal?',
+            templateUsed: 'food_clarification_needed'
+          };
+        } else {
+          // Return successful food logging
+          const progressData = this.mockProgressData(); // Still using mock progress data for now
+          const nutritionData = foodRecognitionResult.nutritionData;
+          if (!nutritionData) {
+            return null; // Fall back to AI generation
+          }
+          return {
+            response: this.generateFoodLoggingResponse(nutritionData, progressData),
+            templateUsed: 'food_logging_success'
+          };
+        }
       
       case 'progress_check':
         const progressOnly = this.mockProgressData();
@@ -600,17 +627,76 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
         };
       
       case 'goal_question':
-        // For V0.1, route nutrition questions to AI for more nuanced responses
-        return {
-          response: '', // Will use AI response
-          templateUsed: 'ai_generated'
-        };
+        // Goal questions require AI generation, return null to fall back to OpenAI
+        return null;
       
       default:
         return {
           response: this.generateGeneralChatResponse(),
           templateUsed: 'fallback_general_chat'
         };
+    }
+  }
+
+  // Integration method for Food Recognition AI
+  private async processWithFoodRecognitionAI(userMessage: string, userId: string): Promise<{
+    requiresClarification: boolean;
+    clarificationMessage?: string;
+    nutritionData?: MockNutritionData;
+  }> {
+    try {
+      console.log(`[UserFacingAI] Calling Food Recognition AI for: "${userMessage}"`);
+      
+      // Create input for Food Recognition AI
+      const foodInput: FoodRecognitionInput = {
+        food_description: userMessage,
+        context: 'chat_conversation',
+        user_id: userId,
+        conversation_history: '' // We can enhance this later with actual context
+      };
+
+      // Call Food Recognition AI
+      const result = await foodRecognitionAI.processFood(foodInput);
+
+      if (result.clarification_needed) {
+        console.log(`[UserFacingAI] Food Recognition AI requires clarification: ${result.clarification_message}`);
+        return {
+          requiresClarification: true,
+          clarificationMessage: result.clarification_message
+        };
+      } else {
+        console.log(`[UserFacingAI] Food Recognition AI successful: ${result.recognized_foods?.length || 0} foods recognized`);
+        
+        // Convert to MockNutritionData format for now (we'll enhance this later)
+        if (!result.recognized_foods || result.recognized_foods.length === 0 || !result.total_nutrition) {
+          throw new Error('Invalid response from Food Recognition AI');
+        }
+        
+        const primaryFood = result.recognized_foods[0];
+        const nutritionData: MockNutritionData = {
+          food: primaryFood.food_name,
+          quantity: primaryFood.quantity,
+          calories: result.total_nutrition.calories,
+          protein: result.total_nutrition.protein,
+          carbs: result.total_nutrition.carbs,
+          fat: result.total_nutrition.fat,
+          confidence: result.confidence_overall || 0
+        };
+
+        return {
+          requiresClarification: false,
+          nutritionData
+        };
+      }
+    } catch (error) {
+      console.error('[UserFacingAI] Error calling Food Recognition AI:', error);
+      
+      // Fall back to mock data for now
+      console.log('[UserFacingAI] Falling back to mock food recognition');
+      return {
+        requiresClarification: false,
+        nutritionData: this.mockFoodRecognition(userMessage)
+      };
     }
   }
 
@@ -662,9 +748,9 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
       console.log(`[UserFacingAI] Reasoning: ${intentResult.reasoning}`);
       
       // Step 2: Try template response first (faster, more consistent)
-      const templateResult = this.generateTemplateResponse(intentResult.intent, userMessage);
+      const templateResult = await this.generateTemplateResponse(intentResult.intent, userMessage, userId);
       
-      if (templateResult.response) {
+      if (templateResult && templateResult.response) {
         // Use template response (no OpenAI call needed)
         console.log(`[UserFacingAI] Using template: ${templateResult.templateUsed}`);
         console.log(`[UserFacingAI] Template response: "${templateResult.response.substring(0, 100)}..."`);
@@ -768,7 +854,7 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
       const { errorType } = this.categorizeError(error);
       
       // Always provide fallback response instead of failing
-      const fallbackResponse = this.generateErrorFallback(errorType, intentResult?.intent || 'general_chat');
+      const fallbackResponse = this.generateErrorFallback(errorType, 'general_chat');
       console.log(`[UserFacingAI] Using error fallback (${errorType}): "${fallbackResponse.substring(0, 60)}..."`);
       
       // Try to update context, but don't fail if this throws too
@@ -791,7 +877,7 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
         metadata: {
           processingTime,
           model: 'fallback',
-          intent: intentResult,
+          intent: { intent: 'general_chat', confidence: 0, reasoning: 'Error fallback' },
           templateUsed: 'error_fallback'
         }
       };
