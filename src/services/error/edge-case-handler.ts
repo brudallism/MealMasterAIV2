@@ -440,6 +440,11 @@ export class EdgeCaseHandler {
     return { valid: true };
   }
 
+  // Handle edge case (wrapper for orchestrator integration)
+  async handleEdgeCase(input: string, userId: string): Promise<EdgeCaseResult> {
+    return this.evaluateInput(input, userId);
+  }
+
   // Get edge case statistics for monitoring
   getEdgeCaseStats(): {
     totalEdgeCases: number;

@@ -6,6 +6,7 @@ import { foodCacheManager } from '../cache/food-cache-manager';
 import { errorManager } from '../error/error-manager';
 import { edgeCaseHandler } from '../error/edge-case-handler';
 import { resilienceManager } from '../error/resilience-manager';
+import { FoodRecognitionErrorIntegration } from '../error/ai-integration-points';
 
 // Input interfaces from Food Recognition AI Guide
 export interface FoodRecognitionInput {
@@ -212,14 +213,35 @@ CONFIDENCE_SCORING_FRAMEWORK:
       // Step 1: Enhanced input validation with edge case handling
       const inputValidation = edgeCaseHandler.validateInputFormat(input.food_description);
       if (!inputValidation.valid) {
-        const error = errorManager.handleFoodRecognitionError(
-          inputValidation.error!,
-          input.user_id,
-          input.food_description,
-          'validation'
-        );
-        setError(error.userMessage);
-        return this.createErrorResponse(error.userMessage, 'validation', startTime);
+        // INTEGRATION: Use Error Handler Orchestrator for validation errors
+        try {
+          const orchestratorResponse = await FoodRecognitionErrorIntegration.handleValidationError(
+            input.food_description,
+            input.user_id,
+            inputValidation.error!
+          );
+          
+          if (orchestratorResponse.escalationRequired) {
+            console.warn(`[FoodRecognitionAI] Crisis escalation during validation: ${orchestratorResponse.userMessage}`);
+            setError('Crisis support provided');
+            return this.createErrorResponse(orchestratorResponse.userMessage, 'system', startTime);
+          }
+          
+          setError(orchestratorResponse.userMessage);
+          return this.createErrorResponse(orchestratorResponse.userMessage, 'validation', startTime);
+          
+        } catch (orchestratorError) {
+          // Fallback to original error handling
+          console.warn(`[FoodRecognitionAI] Orchestrator failed, using legacy validation error handling:`, orchestratorError);
+          const error = errorManager.handleFoodRecognitionError(
+            inputValidation.error!,
+            input.user_id,
+            input.food_description,
+            'validation'
+          );
+          setError(error.userMessage);
+          return this.createErrorResponse(error.userMessage, 'validation', startTime);
+        }
       }
 
       // Step 2: Edge case evaluation and safety checks

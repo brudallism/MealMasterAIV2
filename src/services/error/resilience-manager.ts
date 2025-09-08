@@ -577,6 +577,22 @@ export class ResilienceManager {
     }
   }
 
+  // Circuit breaker methods (delegate to ErrorManager for now)
+  isCircuitOpen(service: string): boolean {
+    // For now, return false - will be integrated with ErrorManager later
+    return false;
+  }
+
+  recordSuccess(service: string): void {
+    // Placeholder - will be integrated with ErrorManager later
+    console.log(`[ResilienceManager] Recording success for ${service}`);
+  }
+
+  recordFailure(service: string): void {
+    // Placeholder - will be integrated with ErrorManager later
+    console.log(`[ResilienceManager] Recording failure for ${service}`);
+  }
+
   // Graceful shutdown
   shutdown(): void {
     if (this.healthCheckTimer) {
