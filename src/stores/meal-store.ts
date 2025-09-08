@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 
 // V0.1 Core Meal Data Types
-interface Meal {
+export interface Meal {
   id: string;
   food_name: string;
   meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -10,6 +10,7 @@ interface Meal {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number; // Optional fiber field
   quantity_grams: number;
   logged_at: string;
   
@@ -21,11 +22,12 @@ interface Meal {
   workflow_id?: string; // Links to AI workflow that created this meal
 }
 
-interface DailyTotals {
+export interface DailyTotals {
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
+  fiber: number;
 }
 
 // V0.2+ Workflow Integration Types (Future)
@@ -76,7 +78,7 @@ interface MealState {
 export const useMealStore = create<MealState>((set, get) => ({
   // V0.1 Core State
   todaysMeals: [],
-  dailyTotals: { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  dailyTotals: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
   isLoading: false,
   selectedDate: new Date().toISOString().split('T')[0],
   
@@ -231,9 +233,10 @@ function calculateDailyTotals(meals: Meal[]): DailyTotals {
       calories: totals.calories + meal.calories,
       protein: totals.protein + meal.protein,
       carbs: totals.carbs + meal.carbs,
-      fat: totals.fat + meal.fat
+      fat: totals.fat + meal.fat,
+      fiber: totals.fiber + (meal.fiber || 0) // Handle missing fiber field gracefully
     }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+    { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
   );
 }
 

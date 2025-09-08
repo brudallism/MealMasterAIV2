@@ -382,19 +382,21 @@ ai_requests_log (
 - Displays compiled responses from multiple AI systems
 - Shows loading states during food recognition processing
 
-### **Placeholder Plans Page**
-**Purpose**: Visual placeholder for future meal planning features
+### **Conversational Goal Setting Interface**
+**Purpose**: Chat-first approach to setting and modifying macro goals
 
 **V0.1 Implementation**:
-- Simple text: "Meal planning coming soon!"
-- Basic navigation structure in place
-- Empty state graphics or illustrations
-- "Stay tuned" messaging that builds anticipation
+- **Onboarding Flow**: "Let's set up your nutrition goals! What's your main objective?"
+- **Guided Collection**: AI conversationally gathers weight, activity level, and goal type
+- **Safety Validation**: Crisis detection for dangerous calorie goals with professional resource routing
+- **Natural Explanations**: AI explains why certain macros are recommended
+- **Easy Adjustments**: Users can modify goals anytime through conversation
 
-**Future Ready**:
-- Navigation structure matches planned V0.3 implementation
-- Easy to replace placeholder with functional components
-- Maintains consistent visual hierarchy and spacing
+**Integration Points**:
+- **User Facing AI**: Enhanced with goal-setting conversation flows and intent detection
+- **Macro Calculator AI**: Goal validation, BMR/TDEE calculations, and safety checks
+- **Error Handler System**: Crisis intervention for eating disorder indicators
+- **User Store**: Updates macro goals and preferences seamlessly
 
 ### **Bottom Navigation**
 **Simple Implementation**:
@@ -478,10 +480,11 @@ ai_requests_log (
 - **Satisfaction**: Users want to continue using the system
 
 ### **V0.1 Completion Checklist**
-- [ ] User can create account and set basic goals
+- [ ] User can set macro goals through conversational AI onboarding
 - [ ] User can log meals through conversation successfully
-- [ ] Dashboard shows accurate macro progress
+- [ ] Dashboard shows accurate macro progress with real-time updates
 - [ ] System handles common food recognition requests
+- [ ] Crisis detection and safety validation for dangerous goals
 - [ ] Error states are handled gracefully
 - [ ] Data persists correctly between app sessions
 - [ ] Basic security and data protection implemented

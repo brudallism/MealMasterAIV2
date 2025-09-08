@@ -1,6 +1,9 @@
 import { openAIClient } from './openai-client';
 import { useAIStore } from '../../stores/ai-store';
+import { useMealStore } from '../../stores/meal-store';
 import { foodRecognitionAI, FoodRecognitionInput, FoodRecognitionResponse } from './food-recognition-ai';
+import { macroCalculatorAI, UserProfile, GoalSettingResponse } from './macro-calculator-ai';
+import { UserFacingErrorIntegration } from '../error/ai-integration-points';
 import OpenAI from 'openai';
 
 // Intent classification types from User Facing AI Guide
@@ -8,6 +11,7 @@ export type IntentType =
   | 'food_logging'      // User wants to log a meal they ate
   | 'progress_check'    // User wants to know their macro progress or daily totals
   | 'goal_question'     // General nutrition advice or macro-related questions
+  | 'goal_setting'      // User wants to set or modify their nutrition goals
   | 'general_chat'      // Greetings, casual conversation, motivation
   | 'help_request'      // User needs guidance on how to use the app
   | 'clarification_needed'; // Ambiguous input requiring clarification
@@ -182,6 +186,9 @@ For V0.1, respond to all food logging attempts with encouraging confirmation and
       
       case 'goal_question':
         return "I'm experiencing some technical difficulties with complex nutrition questions right now. For immediate help, I'd recommend checking with a nutritionist or trying your question again in a few minutes.";
+      
+      case 'goal_setting':
+        return "I'm having trouble with goal calculations right now. For personalized nutrition goals, I'd recommend consulting with a healthcare professional or registered dietitian who can provide safe, personalized guidance.";
       
       case 'help_request':
         return "I'm having trouble right now, but I'm still here to help! You can try logging food by saying something like 'I ate chicken and rice for lunch' or ask about your progress with 'How's my protein today?' Give it another try!";
@@ -365,6 +372,20 @@ For V0.1, respond to all food logging attempts with encouraging confirmation and
       /\bdo i need\b/
     ];
     
+    // Goal setting patterns - NEW for Macro Calculator AI integration
+    const goalSettingPatterns = [
+      /\bi want to (lose|gain|maintain|build|bulk)\b/,
+      /\bmy goal is to (lose|gain|maintain|build|bulk)\b/,
+      /\bset my (goals|targets|calories|protein)\b/,
+      /\bwhat should my (goals|calories|protein|macros) be\b/,
+      /\bhelp me (set goals|calculate goals|find my goals)\b/,
+      /\bi('m|'m| am) \d+ (years old|lbs|kg|pounds|kilos)\b/,
+      /\bi('m|'m| am) (male|female|man|woman)\b/,
+      /\bi('m|'m| am) \d+'?\d*"? (tall|height)\b/,
+      /\bi weigh \d+\b/,
+      /\bwhat are my recommended (goals|macros|calories)\b/
+    ];
+    
     // General chat patterns (lines 265-278)
     const generalChatPatterns = [
       /^(hi|hello|hey|good morning|good afternoon|good evening)/,
@@ -395,6 +416,15 @@ For V0.1, respond to all food logging attempts with encouraging confirmation and
         intent: 'progress_check', 
         confidence: 0.85,
         reasoning: 'Contains progress inquiry patterns'
+      };
+    }
+    
+    // Check for goal setting
+    if (goalSettingPatterns.some(pattern => pattern.test(message))) {
+      return {
+        intent: 'goal_setting',
+        confidence: 0.9,
+        reasoning: 'Contains goal setting patterns'
       };
     }
     
@@ -574,6 +604,36 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
     
     return responses[Math.floor(Math.random() * responses.length)];
   }
+  
+  // Generate goal setting success response
+  private generateGoalSettingResponse(result: GoalSettingResponse): string {
+    const goals = result.recommended_goals;
+    const rationale = result.rationale;
+    
+    return `Perfect! I've calculated your personalized nutrition goals based on your profile:
+
+🎯 **Your Daily Targets:**
+• ${goals?.daily_calorie_goal || 'N/A'} calories
+• ${goals?.protein_goal || 'N/A'}g protein
+• ${goals?.carb_goal || 'N/A'}g carbs  
+• ${goals?.fat_goal || 'N/A'}g fat
+
+**Why these goals?** ${rationale || 'These are calculated using proven formulas based on your age, gender, weight, height, activity level, and goal.'}
+
+Ready to start tracking toward these targets? Just tell me what you eat and I'll show your progress!`;
+  }
+  
+  // Generate crisis intervention response for dangerous goals
+  private generateCrisisResponse(message: string): string {
+    return `I'm concerned about your health and safety. ${message}
+
+🆘 **Immediate Support:**
+• **Crisis Line:** 988 (Suicide & Crisis Lifeline)
+• **Eating Disorder Support:** 1-800-931-2237 (NEDA Helpline)
+• **Emergency:** Call 911
+
+I care about your wellbeing and want to make sure you get the professional support you deserve. Please reach out to these resources - you don't have to go through this alone. 💙`;
+  }
 
   // Main template routing method - now async to handle Food Recognition AI
   private async generateTemplateResponse(intent: IntentType, userMessage: string, userId: string): Promise<{ response: string, templateUsed: string } | null> {
@@ -589,12 +649,16 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
             templateUsed: 'food_clarification_needed'
           };
         } else {
-          // Return successful food logging
-          const progressData = this.mockProgressData(); // Still using mock progress data for now
+          // Process meal with Macro Calculator AI for real-time dashboard updates
           const nutritionData = foodRecognitionResult.nutritionData;
           if (!nutritionData) {
             return null; // Fall back to AI generation
           }
+          
+          // Call Macro Calculator AI to process the meal and update dashboard
+          await this.processWithMacroCalculatorForMeals(nutritionData, userMessage, userId);
+          
+          const progressData = this.mockProgressData(); // Still using mock progress data for now
           return {
             response: this.generateFoodLoggingResponse(nutritionData, progressData),
             templateUsed: 'food_logging_success'
@@ -602,11 +666,38 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
         }
       
       case 'progress_check':
-        const progressOnly = this.mockProgressData();
+        // Get real progress from Macro Calculator AI
+        const realProgress = await this.getRealProgressData(userId);
         return {
-          response: this.generateProgressCheckResponse(progressOnly),
+          response: this.generateProgressCheckResponse(realProgress),
           templateUsed: 'progress_check'
         };
+      
+      case 'goal_setting':
+        // Use Macro Calculator AI for goal setting
+        const goalResult = await this.processWithMacroCalculatorAI(userMessage, userId);
+        
+        if (goalResult.crisisDetected) {
+          // Crisis intervention response
+          return {
+            response: this.generateCrisisResponse(goalResult.clarificationMessage || 'Please seek professional guidance.'),
+            templateUsed: 'crisis_intervention'
+          };
+        } else if (goalResult.requiresClarification) {
+          // Return clarification request
+          return {
+            response: goalResult.clarificationMessage || 'I need more information to calculate your goals.',
+            templateUsed: 'goal_clarification_needed'
+          };
+        } else if (goalResult.goalSettingResponse) {
+          // Return successful goal calculation
+          return {
+            response: this.generateGoalSettingResponse(goalResult.goalSettingResponse),
+            templateUsed: 'goal_setting_success'
+          };
+        }
+        // Fall back to AI generation if something unexpected happened
+        return null;
       
       case 'clarification_needed':
         return {
@@ -635,6 +726,299 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
           response: this.generateGeneralChatResponse(),
           templateUsed: 'fallback_general_chat'
         };
+    }
+  }
+
+  // Integration method for Macro Calculator AI goal setting
+  private async processWithMacroCalculatorAI(userMessage: string, userId: string): Promise<{
+    requiresClarification: boolean;
+    clarificationMessage?: string;
+    goalSettingResponse?: GoalSettingResponse;
+    crisisDetected?: boolean;
+  }> {
+    try {
+      console.log(`[UserFacingAI] Processing goal setting request: "${userMessage}"`);
+      
+      // Extract user profile information from the message
+      const userProfile = this.extractUserProfileFromMessage(userMessage);
+      
+      if (!userProfile || !this.isProfileComplete(userProfile)) {
+        // Need more information for goal calculation
+        const missingInfo = this.getMissingProfileInfo(userProfile);
+        return {
+          requiresClarification: true,
+          clarificationMessage: `I'd love to help calculate your personalized nutrition goals! I need a bit more information: ${missingInfo.join(', ')}. Could you tell me more about yourself?`
+        };
+      }
+      
+      // Call Macro Calculator AI to generate goals
+      const result = await macroCalculatorAI.processGoalSettingRequest(userProfile);
+      
+      if (!result.success) {
+        if (result.requiresCrisisIntervention) {
+          console.warn(`[UserFacingAI] Crisis intervention required for goal calculation`);
+          return {
+            requiresClarification: false,
+            crisisDetected: true,
+            clarificationMessage: result.next_steps || 'Please consult with a healthcare professional for personalized nutrition guidance.'
+          };
+        }
+        
+        return {
+          requiresClarification: true,
+          clarificationMessage: `I had trouble calculating your goals. ${result.errors?.join(' ') || 'Please try providing your information again.'}`
+        };
+      }
+      
+      return {
+        requiresClarification: false,
+        goalSettingResponse: result
+      };
+      
+    } catch (error) {
+      console.error('[UserFacingAI] Error calling Macro Calculator AI:', error);
+      
+      // Use Error Handler integration for goal setting errors
+      await UserFacingErrorIntegration.handleConversationError(
+        userMessage,
+        userId,
+        `Goal setting error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+      
+      return {
+        requiresClarification: true,
+        clarificationMessage: "I'm having trouble with goal calculations right now. For personalized nutrition goals, I'd recommend consulting with a healthcare professional or nutritionist."
+      };
+    }
+  }
+
+  // Helper method to extract user profile from natural language
+  private extractUserProfileFromMessage(message: string): Partial<UserProfile> | null {
+    const lowerMessage = message.toLowerCase();
+    const profile: Partial<UserProfile> = {};
+    
+    // Extract gender
+    if (/\b(male|man|guy|m)\b/.test(lowerMessage)) {
+      profile.gender = 'male';
+    } else if (/\b(female|woman|girl|f)\b/.test(lowerMessage)) {
+      profile.gender = 'female';
+    }
+    
+    // Extract age
+    const ageMatch = lowerMessage.match(/\b(\d+)\s*(years? old|yo|y\/o)\b/) || 
+                     lowerMessage.match(/\bi('m|'m| am)\s*(\d+)\b/);
+    if (ageMatch) {
+      const age = parseInt(ageMatch[1] || ageMatch[2]);
+      if (age >= 16 && age <= 100) {
+        profile.age = age;
+      }
+    }
+    
+    // Extract weight
+    const weightMatch = lowerMessage.match(/\b(\d+(?:\.\d+)?)\s*(lbs?|pounds?)\b/) ||
+                        lowerMessage.match(/\b(\d+(?:\.\d+)?)\s*(kgs?|kilos?|kilograms?)\b/) ||
+                        lowerMessage.match(/\bi weigh\s*(\d+(?:\.\d+)?)\b/);
+    if (weightMatch) {
+      const weight = parseFloat(weightMatch[1]);
+      const unit = weightMatch[2]?.toLowerCase() || 'lbs';
+      
+      if (unit.includes('kg') || unit.includes('kilo')) {
+        profile.weight_kg = weight;
+      } else {
+        profile.weight_kg = weight * 0.453592; // Convert lbs to kg
+      }
+    }
+    
+    // Extract height
+    const heightMatch = lowerMessage.match(/\b(\d+)'(\d+)"\b/) || // 5'8"
+                        lowerMessage.match(/\b(\d+)\s*feet?\s*(\d+)\s*inch/i) || // 5 feet 8 inches
+                        lowerMessage.match(/\b(\d+(?:\.\d+)?)\s*(cm|centimeters?)\b/);
+    
+    if (heightMatch) {
+      if (heightMatch[2] && !heightMatch[0].includes('cm')) {
+        // Feet and inches
+        const feet = parseInt(heightMatch[1]);
+        const inches = parseInt(heightMatch[2]);
+        profile.height_cm = (feet * 12 + inches) * 2.54; // Convert to cm
+      } else if (heightMatch[0].includes('cm')) {
+        // Already in cm
+        profile.height_cm = parseFloat(heightMatch[1]);
+      }
+    }
+    
+    // Extract activity level
+    if (/\b(sedentary|sit|desk|office|inactive)\b/.test(lowerMessage)) {
+      profile.activity_level = 'sedentary';
+    } else if (/\b(light|lightly active|walk|walking)\b/.test(lowerMessage)) {
+      profile.activity_level = 'light';
+    } else if (/\b(moderate|moderately active|exercise.*few.*times)\b/.test(lowerMessage)) {
+      profile.activity_level = 'moderate';
+    } else if (/\b(active|very active|exercise.*daily|workout.*daily)\b/.test(lowerMessage)) {
+      profile.activity_level = 'active';
+    } else if (/\b(very active|athlete|intense.*training)\b/.test(lowerMessage)) {
+      profile.activity_level = 'very_active';
+    }
+    
+    // Extract goal
+    if (/\b(lose|losing|loss|cut|cutting|deficit)\b/.test(lowerMessage)) {
+      profile.goal = 'lose';
+    } else if (/\b(maintain|maintaining|maintenance|same)\b/.test(lowerMessage)) {
+      profile.goal = 'maintain';
+    } else if (/\b(gain|gaining|bulk|bulking|muscle|build)\b/.test(lowerMessage)) {
+      profile.goal = 'bulk';
+    }
+    
+    return Object.keys(profile).length > 0 ? profile : null;
+  }
+  
+  // Check if profile has enough information for goal calculation
+  private isProfileComplete(profile: Partial<UserProfile> | null): profile is UserProfile {
+    if (!profile) return false;
+    
+    return !!(
+      profile.gender &&
+      profile.age &&
+      profile.weight_kg &&
+      profile.height_cm &&
+      profile.activity_level &&
+      profile.goal
+    );
+  }
+  
+  // Get list of missing profile information
+  private getMissingProfileInfo(profile: Partial<UserProfile> | null): string[] {
+    const missing: string[] = [];
+    
+    if (!profile?.gender) missing.push('your gender');
+    if (!profile?.age) missing.push('your age');
+    if (!profile?.weight_kg) missing.push('your weight');
+    if (!profile?.height_cm) missing.push('your height');
+    if (!profile?.activity_level) missing.push('your activity level (sedentary, light, moderate, active, or very active)');
+    if (!profile?.goal) missing.push('your goal (lose weight, maintain, or build muscle)');
+    
+    return missing;
+  }
+
+  // Integration method for Macro Calculator AI meal processing
+  private async processWithMacroCalculatorForMeals(
+    nutritionData: MockNutritionData, 
+    userMessage: string, 
+    userId: string
+  ): Promise<void> {
+    try {
+      console.log(`[UserFacingAI] Processing meal with Macro Calculator AI for dashboard update`);
+      
+      // Get user's current goals from user store
+      const { useUserStore } = await import('../../stores/user-store');
+      const userGoals = useUserStore.getState().goals;
+      
+      // Get today's meals from meal store to provide context
+      const mealStore = useMealStore.getState();
+      const existingMeals = mealStore.todaysMeals;
+      
+      // Convert nutrition data to the format expected by Macro Calculator AI
+      const calculationRequest = {
+        trigger_type: 'meal_logged' as const,
+        user_id: userId,
+        nutrition_data: {
+          meal_name: nutritionData.food,
+          total_nutrition: {
+            calories: nutritionData.calories,
+            protein: nutritionData.protein,
+            carbs: nutritionData.carbs,
+            fat: nutritionData.fat,
+            fiber: 0 // MockNutritionData doesn't have fiber, use 0 as fallback
+          },
+          confidence_overall: nutritionData.confidence,
+          meal_timestamp: new Date().toISOString()
+        },
+        user_context: {
+          daily_goals: userGoals,
+          todays_meals: existingMeals.map(meal => ({
+            id: meal.id,
+            calories: meal.calories,
+            protein: meal.protein,
+            carbs: meal.carbs,
+            fat: meal.fat,
+            fiber: 0, // Meal interface doesn't have fiber, use 0 as fallback
+            logged_at: new Date(meal.logged_at),
+            confidence: meal.ai_confidence || 0.9
+          }))
+        }
+      };
+      
+      // Process with Macro Calculator AI - this will automatically update the dashboard
+      const result = await macroCalculatorAI.processCalculationRequest(calculationRequest);
+      
+      console.log(`[UserFacingAI] Macro Calculator processed meal: ${result.calculation_results.daily_totals.calories} total calories`);
+      
+    } catch (error) {
+      console.error('[UserFacingAI] Error processing meal with Macro Calculator AI:', error);
+      // Don't throw - meal logging should still work even if macro calculation fails
+    }
+  }
+
+  // Get real progress data from Macro Calculator AI
+  private async getRealProgressData(userId: string): Promise<MockProgressData> {
+    try {
+      // Get user's goals and current meal data
+      const { useUserStore } = await import('../../stores/user-store');
+      const userGoals = useUserStore.getState().goals;
+      const mealStore = useMealStore.getState();
+      
+      // Create a progress query request
+      const progressRequest = {
+        trigger_type: 'progress_query' as const,
+        user_id: userId,
+        user_context: {
+          daily_goals: userGoals,
+          todays_meals: mealStore.todaysMeals.map(meal => ({
+            id: meal.id,
+            calories: meal.calories,
+            protein: meal.protein,
+            carbs: meal.carbs,
+            fat: meal.fat,
+            fiber: 0, // Meal interface doesn't have fiber, use 0 as fallback
+            logged_at: new Date(meal.logged_at),
+            confidence: meal.ai_confidence || 0.9
+          })),
+          goal_progress_query: 'How am I doing today?'
+        }
+      };
+      
+      // Get real progress from Macro Calculator AI
+      const result = await macroCalculatorAI.processCalculationRequest(progressRequest);
+      const totals = result.calculation_results.daily_totals;
+      const progress = result.calculation_results.goal_progress;
+      
+      // Convert to MockProgressData format for consistency
+      const currentHour = new Date().getHours();
+      let timeOfDay = 'evening';
+      if (currentHour < 12) timeOfDay = 'morning';
+      else if (currentHour < 17) timeOfDay = 'afternoon';
+      
+      return {
+        currentProtein: totals.protein,
+        proteinGoal: userGoals.protein_goal,
+        proteinPercentage: Math.round(progress.protein_percentage),
+        timeOfDay,
+        encouragement: this.generateTimeBasedEncouragement(progress.protein_percentage, timeOfDay)
+      };
+      
+    } catch (error) {
+      console.error('[UserFacingAI] Error getting real progress data:', error);
+      // Fall back to mock data if real data fails
+      return this.mockProgressData();
+    }
+  }
+  
+  private generateTimeBasedEncouragement(proteinPercentage: number, timeOfDay: string): string {
+    if (proteinPercentage >= 80) {
+      return `You're crushing your protein goals this ${timeOfDay}! Keep up the excellent work!`;
+    } else if (proteinPercentage >= 50) {
+      return `Solid progress this ${timeOfDay}! You typically nail your protein goals by end of day.`;
+    } else {
+      return `Good start this ${timeOfDay}! There's still time to reach your protein target.`;
     }
   }
 
@@ -850,37 +1234,83 @@ That brings you to ${progressData.proteinPercentage}% of your protein goal today
       const processingTime = Date.now() - startTime;
       console.error(`[UserFacingAI] Service error after ${processingTime}ms:`, error);
       
-      // Categorize error and generate appropriate fallback
-      const { errorType } = this.categorizeError(error);
-      
-      // Always provide fallback response instead of failing
-      const fallbackResponse = this.generateErrorFallback(errorType, 'general_chat');
-      console.log(`[UserFacingAI] Using error fallback (${errorType}): "${fallbackResponse.substring(0, 60)}..."`);
-      
-      // Try to update context, but don't fail if this throws too
+      // INTEGRATION: Use Error Handler Orchestrator for comprehensive error handling
       try {
-        const safeContext = this.getOrCreateContext(userId);
-        this.updateContext(safeContext, userMessage, fallbackResponse);
-      } catch (contextError) {
-        console.warn(`[UserFacingAI] Failed to update context during error recovery:`, contextError);
-      }
-      
-      // Set error in store and complete with fallback
-      setError(`System error (${errorType}): ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setComplete(fallbackResponse);
-      
-      return {
-        success: true, // We're providing a fallback, so this is still "successful"
-        response: fallbackResponse,
-        fallbackUsed: true,
-        errorType: errorType as any,
-        metadata: {
-          processingTime,
-          model: 'fallback',
-          intent: { intent: 'general_chat', confidence: 0, reasoning: 'Error fallback' },
-          templateUsed: 'error_fallback'
+        const errorResponse = await UserFacingErrorIntegration.handleConversationError(
+          userMessage,
+          userId,
+          error instanceof Error ? error.message : String(error)
+        );
+
+        // Check for crisis escalation from orchestrator
+        if (errorResponse.escalationRequired) {
+          console.warn(`[UserFacingAI] Crisis escalation required - using orchestrator response`);
+          setError('Crisis support provided');
+          setComplete(errorResponse.userMessage);
+          
+          return {
+            success: false, // Crisis situations are not "successful" processing
+            response: errorResponse.userMessage,
+            errorType: 'system',
+            metadata: {
+              processingTime,
+              model: 'error_handler_orchestrator',
+              intent: { intent: 'help_request', confidence: 1.0, reasoning: 'Crisis escalation' },
+              templateUsed: 'crisis_escalation'
+            }
+          };
         }
-      };
+
+        // Use orchestrator response for non-crisis errors
+        const fallbackResponse = errorResponse.userMessage;
+        console.log(`[UserFacingAI] Using orchestrator fallback: "${fallbackResponse.substring(0, 60)}..."`);
+        
+        // Try to update context, but don't fail if this throws too
+        try {
+          const safeContext = this.getOrCreateContext(userId);
+          this.updateContext(safeContext, userMessage, fallbackResponse);
+        } catch (contextError) {
+          console.warn(`[UserFacingAI] Failed to update context during error recovery:`, contextError);
+        }
+        
+        // Set error in store and complete with orchestrator response
+        setError(`System error handled by orchestrator (${errorResponse.systemStatus})`);
+        setComplete(fallbackResponse);
+
+        return {
+          success: true, // We're providing a fallback, so this is still "successful"
+          response: fallbackResponse,
+          fallbackUsed: true,
+          errorType: 'orchestrator_handled' as any,
+          metadata: {
+            processingTime,
+            model: 'error_handler_orchestrator',
+            intent: { intent: 'general_chat', confidence: 0, reasoning: 'Error handled by orchestrator' },
+            templateUsed: 'orchestrator_fallback'
+          }
+        };
+
+      } catch (orchestratorError) {
+        // Fallback to original error handling if orchestrator fails
+        console.error(`[UserFacingAI] Orchestrator failed, using legacy fallback:`, orchestratorError);
+        const { errorType } = this.categorizeError(error);
+        const legacyFallbackResponse = this.generateErrorFallback(errorType, 'general_chat');
+        setError(`System error (${errorType}): ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setComplete(legacyFallbackResponse);
+        
+        return {
+          success: true, // We're providing a fallback, so this is still "successful"
+          response: legacyFallbackResponse,
+          fallbackUsed: true,
+          errorType: errorType as any,
+          metadata: {
+            processingTime,
+            model: 'fallback',
+            intent: { intent: 'general_chat', confidence: 0, reasoning: 'Error fallback' },
+            templateUsed: 'error_fallback'
+          }
+        };
+      }
     }
   }
 
