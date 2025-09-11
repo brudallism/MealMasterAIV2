@@ -18,6 +18,7 @@ interface UserGoals {
 interface User {
   id: string;
   email: string;
+  name: string;
   onboarding_completed: boolean;
   
   // V0.2+ Enhanced Profile (Expansion Hooks)
@@ -51,6 +52,25 @@ interface UserSession {
   contextualData: Record<string, any>; // Location, time-based preferences, etc.
 }
 
+// Onboarding State Management
+interface OnboardingState {
+  phase: 'profile' | 'goals' | 'preferences' | 'tutorial' | 'completed';
+  step: number;
+  collectedData: {
+    age?: number;
+    gender?: 'male' | 'female' | 'other';
+    height_cm?: number;
+    weight_kg?: number;
+    activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+    primary_goal?: 'lose' | 'maintain' | 'bulk';
+    dietary_preferences?: string[];
+    allergens?: string[];
+    restrictions?: string[];
+  };
+  calculatedGoals?: UserGoals;
+  selectedGoalOption?: 'recommended' | 'conservative' | 'aggressive';
+}
+
 interface UserState {
   // V0.1 Core State
   user: User | null;
@@ -61,8 +81,19 @@ interface UserState {
   // V0.2+ Enhanced State (Expansion Hooks)
   personalization: UserPersonalization;
   session: UserSession | null;
-  preferences: Record<string, any>;
+  preferences: Record<string, any> & {
+    aiChatEnabled?: boolean;
+  };
   achievements: string[];
+  onboardingState: OnboardingState;
+  
+  // AI Features State
+  aiChatEnabled: boolean;
+  aiSuggestionsEnabled: boolean;
+  dataPrivacyMode: boolean;
+  completedMilestones: string[];
+  userEngagement: number;
+  isConnected: boolean;
   
   // V0.1 Core Actions
   setUser: (user: User | null) => void;
@@ -80,6 +111,26 @@ interface UserState {
   setPreference: (key: string, value: any) => void;
   addAchievement: (achievement: string) => void;
   updateProfile: (updates: Partial<User>) => void;
+  
+  // Onboarding helpers
+  needsOnboarding: () => boolean;
+  dismissOnboarding: () => void;
+  startOnboarding: () => void;
+  updateOnboardingData: (data: Partial<OnboardingState['collectedData']>) => void;
+  updateOnboardingGoals: (goals: UserGoals) => void;
+  updateOnboardingGoalSelection: (selection: 'recommended' | 'conservative' | 'aggressive') => void;
+  advanceOnboardingStep: () => void;
+  completeOnboardingPhase: (nextPhase: OnboardingState['phase']) => void;
+  
+  // AI Features Actions
+  updateAISettings: (settings: {
+    aiChatEnabled?: boolean;
+    aiSuggestionsEnabled?: boolean;
+    dataPrivacyMode?: boolean;
+  }) => void;
+  updateMilestone: (milestone: string) => void;
+  incrementUserEngagement: () => void;
+  setConnected: (connected: boolean) => void;
   
   // V0.3+ Advanced Actions (Future)
   syncHealthData: (source: string, data: any) => void;
@@ -112,9 +163,26 @@ export const useUserStore = create<UserState>((set, get) => ({
     notifications_enabled: true,
     dark_mode: false,
     metric_units: true,
-    language: 'en'
+    language: 'en',
+    onboarding_dismissed: false,
+    aiChatEnabled: false
   },
   achievements: [],
+  onboardingState: {
+    phase: 'profile',
+    step: 1,
+    collectedData: {},
+    calculatedGoals: undefined,
+    selectedGoalOption: undefined
+  },
+  
+  // AI Features State (Initialize)
+  aiChatEnabled: false,
+  aiSuggestionsEnabled: true,
+  dataPrivacyMode: false,
+  completedMilestones: [],
+  userEngagement: 0,
+  isConnected: true,
   
   // V0.1 Core Actions
   setUser: (user: User | null) => set({ user }),
@@ -200,6 +268,102 @@ export const useUserStore = create<UserState>((set, get) => ({
   updateProfile: (updates: Partial<User>) => set((state) => ({
     user: state.user ? { ...state.user, ...updates } : null
   })),
+  
+  // Onboarding helpers
+  needsOnboarding: () => {
+    const state = get();
+    // User needs onboarding if:
+    // 1. They haven't dismissed it AND
+    // 2. They don't have a complete profile (age, weight, height) OR haven't completed onboarding
+    return !state.preferences.onboarding_dismissed && 
+           (!state.user?.onboarding_completed || 
+            !state.user?.age || 
+            !state.user?.weight || 
+            !state.user?.height);
+  },
+  
+  dismissOnboarding: () => set((state) => ({
+    preferences: {
+      ...state.preferences,
+      onboarding_dismissed: true
+    }
+  })),
+  
+  startOnboarding: () => set({
+    onboardingState: {
+      phase: 'profile',
+      step: 1,
+      collectedData: {},
+      calculatedGoals: undefined,
+      selectedGoalOption: undefined
+    }
+  }),
+  
+  updateOnboardingData: (data: Partial<OnboardingState['collectedData']>) => set((state) => ({
+    onboardingState: {
+      ...state.onboardingState,
+      collectedData: {
+        ...state.onboardingState.collectedData,
+        ...data
+      }
+    }
+  })),
+  
+  advanceOnboardingStep: () => set((state) => ({
+    onboardingState: {
+      ...state.onboardingState,
+      step: state.onboardingState.step + 1
+    }
+  })),
+  
+  completeOnboardingPhase: (nextPhase: OnboardingState['phase']) => set((state) => ({
+    onboardingState: {
+      ...state.onboardingState,
+      phase: nextPhase,
+      step: 1
+    }
+  })),
+  
+  updateOnboardingGoals: (goals: UserGoals) => set((state) => ({
+    onboardingState: {
+      ...state.onboardingState,
+      calculatedGoals: goals
+    }
+  })),
+  
+  updateOnboardingGoalSelection: (selection: 'recommended' | 'conservative' | 'aggressive') => set((state) => ({
+    onboardingState: {
+      ...state.onboardingState,
+      selectedGoalOption: selection
+    }
+  })),
+  
+  // AI Features Actions Implementation
+  updateAISettings: (settings: {
+    aiChatEnabled?: boolean;
+    aiSuggestionsEnabled?: boolean;
+    dataPrivacyMode?: boolean;
+  }) => set((state) => ({
+    aiChatEnabled: settings.aiChatEnabled ?? state.aiChatEnabled,
+    aiSuggestionsEnabled: settings.aiSuggestionsEnabled ?? state.aiSuggestionsEnabled,
+    dataPrivacyMode: settings.dataPrivacyMode ?? state.dataPrivacyMode,
+    preferences: {
+      ...state.preferences,
+      aiChatEnabled: settings.aiChatEnabled ?? state.preferences.aiChatEnabled
+    }
+  })),
+  
+  updateMilestone: (milestone: string) => set((state) => ({
+    completedMilestones: state.completedMilestones.includes(milestone) 
+      ? state.completedMilestones 
+      : [...state.completedMilestones, milestone]
+  })),
+  
+  incrementUserEngagement: () => set((state) => ({
+    userEngagement: state.userEngagement + 1
+  })),
+  
+  setConnected: (connected: boolean) => set({ isConnected: connected }),
   
   // V0.3+ Advanced Actions (Future Stubs)
   syncHealthData: async (source: string, data: any) => {
