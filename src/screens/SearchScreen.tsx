@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TextInput,
   FlatList,
   TouchableOpacity,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { FoodLookupResult } from '../services/api/types';
 import { useSearchStore } from '../stores/search-store';
@@ -16,7 +16,6 @@ import { useCart } from '../stores/cart-store';
 import FoodDetailModal from '../components/organisms/FoodDetailModal';
 import MealBasketModal from '../components/organisms/MealBasketModal';
 // import BarcodeScanner from '../components/organisms/BarcodeScanner'; // Temporarily disabled until native modules are rebuilt
-import { FloatingChatBubbleWrapper } from '../components/atoms/FloatingChatBubble';
 
 export default function SearchScreen() {
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
@@ -318,28 +317,48 @@ export default function SearchScreen() {
         nutritionMap.set(food.fdcId, food);
       });
       
-      // Convert optimized USDA response to our FoodLookupResult format
+      // Convert optimized USDA response to the format expected by our stores
       const foods: FoodLookupResult[] = optimizedFoods.map((food: any) => {
         const detailedFood = nutritionMap.get(food.fdcId);
         const nutrients = detailedFood?.foodNutrients || [];
-        
+
         // Create display name with brand for branded foods
         const baseName = food.description || 'Unknown food';
         const brandName = food.brandOwner;
         const displayName = brandName ? `${baseName} - ${brandName}` : baseName;
-        
+
+        // Helper function to extract nutrient values by nutrient number (string)
+        const getNutrientValue = (nutrientNumber: string): number => {
+          const nutrient = nutrients.find((n: any) => n.nutrient?.number === nutrientNumber);
+          return nutrient?.amount || 0;
+        };
+
         return {
+          fdcId: food.fdcId,
+          description: displayName,
+          brandOwner: brandName,
+          dataType: food.dataType,
+          foodCategory: food.foodCategory || 'ingredient',
+          foodNutrients: nutrients.map((n: any) => ({
+            nutrientId: n.nutrient?.id,
+            nutrientNumber: n.nutrient?.number,
+            nutrientName: n.nutrient?.name,
+            value: n.amount || 0,
+            unitName: n.nutrient?.unitName || 'g'
+          })),
+          ingredients: detailedFood?.ingredients,
+          // Legacy format for backward compatibility
           id: `usda_${food.fdcId}`,
           name: displayName,
           brand: brandName,
           category: food.foodCategory || 'ingredient',
           nutrition: {
             per100g: {
-              calories: extractNutrient(nutrients, 1008) || 0, // Energy
-              protein: extractNutrient(nutrients, 1003) || 0, // Protein
-              carbs: extractNutrient(nutrients, 1005) || 0, // Carbs
-              fat: extractNutrient(nutrients, 1004) || 0, // Fat
-              fiber: extractNutrient(nutrients, 1079) || 0, // Fiber
+              calories: getNutrientValue('208') || 0, // Energy (kcal)
+              protein: getNutrientValue('203') || 0, // Protein
+              carbs: getNutrientValue('205') || 0, // Carbs
+              fat: getNutrientValue('204') || 0, // Fat
+              fiber: getNutrientValue('291') || 0, // Fiber
             },
             servingSize: '100g'
           },
@@ -405,53 +424,17 @@ export default function SearchScreen() {
   };
 
   const handleAddToMeal = (food: FoodLookupResult, quantity: number, unit: string) => {
-    // Convert FoodLookupResult to the format expected by stores with safety guards
-    const convertedFood = {
-      id: food.id,
-      name: food.name,
-      calories: food.nutrition.per100g.calories || 0,
-      protein: food.nutrition.per100g.protein || 0,
-      carbs: food.nutrition.per100g.carbs || 0,
-      fat: food.nutrition.per100g.fat || 0,
-      fiber: food.nutrition.per100g.fiber || 0,
-      serving_size: food.nutrition.servingSize || '100g',
-      source: food.source.api,
-      category: 'ingredient',
-      confidence: 1
-    };
-    
-    // Add to recent foods for quick access
-    addRecentFood(convertedFood);
-    
-    // Add to cart with specified serving
-    addToCart(convertedFood, quantity, unit);
-    
-    console.log(`Added to meal: ${food.name} (${quantity} ${unit})`);
+    // Add to cart directly using the FoodLookupResult format
+    addToCart(food, quantity, unit);
+
+    console.log(`Added to meal: ${food.description} (${quantity} ${unit})`);
   };
 
   const handleAddToCart = (food: FoodLookupResult) => {
-    // Convert FoodLookupResult to the format expected by stores with safety guards
-    const convertedFood = {
-      id: food.id,
-      name: food.name,
-      calories: food.nutrition.per100g.calories || 0,
-      protein: food.nutrition.per100g.protein || 0,
-      carbs: food.nutrition.per100g.carbs || 0,
-      fat: food.nutrition.per100g.fat || 0,
-      fiber: food.nutrition.per100g.fiber || 0,
-      serving_size: food.nutrition.servingSize || '100g',
-      source: food.source.api,
-      category: 'ingredient',
-      confidence: 1
-    };
-    
-    // Add to recent foods for quick access
-    addRecentFood(convertedFood);
-    
-    // Add to cart with default serving
-    addToCart(convertedFood, 1, convertedFood.serving_size);
-    
-    console.log('Added to cart:', food.name);
+    // Add to cart directly using the FoodLookupResult format
+    addToCart(food, 1, 'serving');
+
+    console.log('Added to cart:', food.description);
   };
 
   const openBarcodeScanner = () => {
@@ -460,21 +443,8 @@ export default function SearchScreen() {
   };
 
   const handleBarcodeProduct = (product: FoodLookupResult) => {
-    // Convert and add to recent foods with safety guards
-    const convertedFood = {
-      id: product.id,
-      name: product.name,
-      calories: product.nutrition.per100g.calories || 0,
-      protein: product.nutrition.per100g.protein || 0,
-      carbs: product.nutrition.per100g.carbs || 0,
-      fat: product.nutrition.per100g.fat || 0,
-      fiber: product.nutrition.per100g.fiber || 0,
-      serving_size: product.nutrition.servingSize || '100g',
-      source: product.source.api,
-      category: 'ingredient',
-      confidence: 1
-    };
-    addRecentFood(convertedFood);
+    // This will be used when barcode scanner is implemented
+    console.log('Barcode product found:', product.description);
   };
 
   const renderFoodItem = ({ item }: { item: FoodLookupResult }) => (
@@ -486,12 +456,12 @@ export default function SearchScreen() {
         <Text style={styles.foodIcon}>{item.metadata?.foodIcon || '🍽️'}</Text>
       </View>
       <View style={styles.foodInfo}>
-        <Text style={styles.foodName}>{item.name}</Text>
+        <Text style={styles.foodName}>{item.description}</Text>
         <Text style={styles.foodNutrition}>
-          {Math.round(item.nutrition.per100g.calories || 0)} cal • {Math.round(item.nutrition.per100g.protein || 0)}g protein • {Math.round(item.nutrition.per100g.carbs || 0)}g carbs
+          {Math.round(item.nutrition?.per100g?.calories || 0)} cal • {Math.round(item.nutrition?.per100g?.protein || 0)}g protein • {Math.round(item.nutrition?.per100g?.carbs || 0)}g carbs
         </Text>
-        <Text style={styles.servingSize}>{item.nutrition.servingSize || '100g'}</Text>
-        <Text style={styles.foodSource}>Source: {item.source.api}</Text>
+        <Text style={styles.servingSize}>{item.nutrition?.servingSize || '100g'}</Text>
+        <Text style={styles.foodSource}>Source: {item.source?.api || 'USDA'}</Text>
         {item.metadata?.warnings && item.metadata.warnings.length > 0 && (
           <Text style={styles.warningText}>⚠️ {item.metadata.warnings[0]}</Text>
         )}
@@ -509,14 +479,14 @@ export default function SearchScreen() {
   );
 
   const renderSection = (title: string, data: FoodLookupResult[]) => {
-    if (data.length === 0) return null;
+    if (!data || data.length === 0) return null;
     
     return (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{title}</Text>
         <FlatList
           data={data}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.fdcId?.toString() || item.id}
           renderItem={renderFoodItem}
           scrollEnabled={false}
         />
@@ -540,7 +510,6 @@ export default function SearchScreen() {
   // const starredFoodsList = getStarredByCategory().map(starred => starred.food);
 
   return (
-    <FloatingChatBubbleWrapper>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <View style={styles.searchContainer}>
@@ -607,9 +576,9 @@ export default function SearchScreen() {
               
               {searchResults && (
                 <>
-                  {renderSection('Ingredients', searchResults.ingredients)}
-                  {renderSection('Products', searchResults.products)}
-                  {renderSection('Recipes', searchResults.recipes)}
+                  {renderSection('Ingredients', searchResults.ingredients || [])}
+                  {renderSection('Products', searchResults.products || [])}
+                  {renderSection('Recipes', searchResults.recipes || [])}
                 </>
               )}
               
@@ -641,7 +610,6 @@ export default function SearchScreen() {
           visible={showFoodModal}
           food={selectedFood}
           onClose={handleCloseFoodModal}
-          onAddToMeal={handleAddToMeal}
         />
 
         <MealBasketModal
@@ -649,7 +617,6 @@ export default function SearchScreen() {
           onClose={() => setShowBasketModal(false)}
         />
       </SafeAreaView>
-    </FloatingChatBubbleWrapper>
   );
 }
 

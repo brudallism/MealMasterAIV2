@@ -137,6 +137,11 @@ interface UserState {
   updateSubscription: (status: User['subscription_status']) => void;
   exportUserData: () => Promise<any>;
   deleteUserData: () => Promise<void>;
+
+  // Privacy Consent Functions
+  needsPrivacyConsent: boolean;
+  hasValidConsent: () => boolean;
+  setPrivacyConsents: (consents: any) => void;
 }
 
 export const useUserStore = create<UserState>((set, get) => ({
@@ -401,7 +406,34 @@ export const useUserStore = create<UserState>((set, get) => ({
         fat_goal: 65
       }
     });
-  }
+  },
+
+  // Privacy Consent Implementation
+  needsPrivacyConsent: false,
+
+  hasValidConsent: () => {
+    const state = get();
+    const consents = state.preferences.privacyConsents;
+    if (!consents || !consents.timestamp) return false;
+
+    // Check if consent is less than 12 months old
+    const consentDate = new Date(consents.timestamp);
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+
+    return consentDate > twelveMonthsAgo && consents.analytics === true;
+  },
+
+  setPrivacyConsents: (consents: any) => set((state) => ({
+    preferences: {
+      ...state.preferences,
+      privacyConsents: {
+        ...consents,
+        timestamp: new Date().toISOString()
+      }
+    },
+    needsPrivacyConsent: false
+  }))
 }));
 
 // V0.1 Helper: Simple user management (maintains current API)

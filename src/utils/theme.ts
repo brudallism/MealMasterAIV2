@@ -92,6 +92,17 @@ export const colors = {
     secondary: '#F9FAFB',
     tertiary: '#F3F4F6',
   },
+
+  // Theme Colors (for component compatibility)
+  theme: {
+    white: '#FFFFFF',
+    teal: '#10B981',
+    orange: '#F59E0B',
+    sage: '#059669',
+    mustard: '#FBBF24',
+    coral: '#EF4444',
+    cream: '#FEF3C7',
+  },
 };
 
 export const typography = {

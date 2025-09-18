@@ -4,6 +4,7 @@
     "slug": "meal-master-ai",
     "version": "0.1.0",
     "orientation": "portrait",
+    "sdkVersion": "54.0.8",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {

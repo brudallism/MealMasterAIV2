@@ -2,7 +2,23 @@
 import { create } from 'zustand';
 
 // Import CartItem type from cart-store
-import type { CartItem } from './cart-store';
+// import type { CartItem } from './cart-store';
+
+// Temporary CartItem type definition
+interface CartItem {
+  id: string;
+  food: any;
+  quantity: number;
+  unit: string;
+  notes?: string;
+  addedAt: number;
+  calculatedNutrition: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+}
 
 // V0.1 Core Meal Data Types
 export interface Meal {

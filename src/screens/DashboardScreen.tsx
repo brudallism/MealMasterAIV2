@@ -18,16 +18,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 // import * as Sentry from '@sentry/react-native'; // Removed since we're not using Sentry
 import { useMealStore, Meal } from '@/stores/meal-store';
-import { useUserStore, MicronutrientGoals } from '@/stores/user-store';
-import { useSearchStore } from '@/stores/search-store';
-import { useCartStore } from '@/stores/cart-store';
+import { useUserStore } from '@/stores/user-store';
+// import { useSearchStore } from '@/stores/search-store';
+// import { useCartStore } from '@/stores/cart-store';
 import { colors, typography, spacing, borderRadius, shadows } from '@/utils/theme';
-import SettingsScreen from './SettingsScreen';
+// import SettingsScreen from './SettingsScreen';
 import { useNavigation } from '@react-navigation/native';
 import MacroRingComponent from '@/components/atoms/MacroRing';
 // import SentryTestButton from '@/components/atoms/SentryTestButton'; // Removed since we're not using Sentry
-import PrivacyConsentModal, { PrivacyConsents } from '@/components/molecules/PrivacyConsentModal';
-import MealBasketModal from '@/components/organisms/MealBasketModal';
+// import PrivacyConsentModal, { PrivacyConsents } from '@/components/molecules/PrivacyConsentModal';
+// import MealBasketModal from '@/components/organisms/MealBasketModal';
 import WeeklyCalendar from '@/components/molecules/WeeklyCalendar';
 
 const { width, height } = Dimensions.get('window');
@@ -398,8 +398,17 @@ export default function DashboardScreen() {
     hasValidConsent,
     setPrivacyConsents
   } = useUserStore();
-  const { addStarredFood, removeStarredFood, isStarred } = useSearchStore();
-  const { clearCart, setMealName, setMealType, addToCart } = useCartStore();
+  // const { addStarredFood, removeStarredFood, isStarred } = useSearchStore();
+  // const { clearCart, setMealName, setMealType, addToCart } = useCartStore();
+
+  // Temporary stub functions to prevent errors
+  const addStarredFood = () => {};
+  const removeStarredFood = () => {};
+  const isStarred = () => false;
+  const clearCart = () => {};
+  const setMealName = () => {};
+  const setMealType = () => {};
+  const addToCart = () => {};
   const [showSettings, setShowSettings] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
@@ -451,7 +460,7 @@ export default function DashboardScreen() {
   }, [needsPrivacyConsent, hasValidConsent]);
 
   // Privacy consent handlers
-  const handlePrivacyAccept = useCallback((consents: PrivacyConsents) => {
+  const handlePrivacyAccept = useCallback((consents: any) => {
     setPrivacyConsents(consents);
     setShowPrivacyModal(false);
   }, [setPrivacyConsents]);
@@ -1045,13 +1054,13 @@ export default function DashboardScreen() {
       {refreshing && <FoodLoadingAnimation />}
       
       {/* Settings Modal */}
-      <Modal
+      {/* <Modal
         visible={showSettings}
         animationType="slide"
         presentationStyle="fullScreen"
       >
-        <SettingsScreen onClose={() => setShowSettings(false)} />
-      </Modal>
+        <Text>Settings Screen Placeholder</Text>
+      </Modal> */}
 
       {/* Meal Detail Modal */}
       <Modal
@@ -1270,18 +1279,18 @@ export default function DashboardScreen() {
       </Modal>
 
       {/* Privacy Consent Modal */}
-      <PrivacyConsentModal
+      {/* <PrivacyConsentModal
         visible={showPrivacyModal}
         onAccept={handlePrivacyAccept}
         onDecline={handlePrivacyDecline}
         isFirstTime={needsPrivacyConsent}
-      />
+      /> */}
 
       {/* Meal Basket Modal */}
-      <MealBasketModal
+      {/* <MealBasketModal
         visible={showMealBasket}
         onClose={() => setShowMealBasket(false)}
-      />
+      /> */}
 
       </SafeAreaView>
     </GestureHandlerRootView>
