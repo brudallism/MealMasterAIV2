@@ -23,6 +23,9 @@ interface EnhancedMacroRingProps {
   // Status indicators
   showStatusIndicators?: boolean;
   targetTolerance?: number; // Percentage tolerance for star indicator (default: 5%)
+
+  // Custom center text (for progress-preview mode)
+  customCenterText?: string;
 }
 
 export default function EnhancedMacroRing({
@@ -36,7 +39,8 @@ export default function EnhancedMacroRing({
   animated = true,
   animationDuration = 800,
   showStatusIndicators = true,
-  targetTolerance = 5
+  targetTolerance = 5,
+  customCenterText
 }: EnhancedMacroRingProps) {
   const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -110,7 +114,7 @@ export default function EnhancedMacroRing({
           {/* Start indicator at 12 o'clock */}
           <Circle
             cx={svgSize / 2}
-            cy={strokeWidth}
+            cy={svgSize / 2 - radius}
             r={2}
             fill={color}
           />
@@ -150,7 +154,7 @@ export default function EnhancedMacroRing({
           {/* Start indicator at 12 o'clock */}
           <Circle
             cx={svgSize / 2}
-            cy={strokeWidth}
+            cy={svgSize / 2 - radius}
             r={2}
             fill={color}
           />
@@ -160,6 +164,15 @@ export default function EnhancedMacroRing({
   };
 
   const renderCenterContent = () => {
+    // Custom center text takes priority
+    if (customCenterText) {
+      return (
+        <Text style={[styles.customCenterText, sizeConfig.centerText]}>
+          {customCenterText}
+        </Text>
+      );
+    }
+
     if (variant === 'absolute') {
       // Absolute variant: show only current value
       return (
@@ -235,7 +248,7 @@ function getSizeConfig(size: 'small' | 'medium' | 'large') {
     case 'small':
       return {
         svgSize: 60,
-        radius: 24,
+        radius: 28, // Moved closer to edge (60/2 - 2)
         strokeWidth: 4,
         wrapper: { width: 60, height: 60 },
         container: { width: 60, height: 60, borderRadius: 30 },
@@ -249,7 +262,7 @@ function getSizeConfig(size: 'small' | 'medium' | 'large') {
     case 'large':
       return {
         svgSize: 100,
-        radius: 42,
+        radius: 46, // Moved closer to edge (100/2 - 4)
         strokeWidth: 8,
         wrapper: { width: 100, height: 100 },
         container: { width: 100, height: 100, borderRadius: 50 },
@@ -263,7 +276,7 @@ function getSizeConfig(size: 'small' | 'medium' | 'large') {
     default: // medium
       return {
         svgSize: 80,
-        radius: 32,
+        radius: 37, // Moved closer to edge (80/2 - 3)
         strokeWidth: 6,
         wrapper: { width: 80, height: 80 },
         container: { width: 80, height: 80, borderRadius: 40 },
@@ -319,6 +332,14 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: 2,
+  },
+  customCenterText: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+    textAlign: 'center',
+    fontSize: 8, // Even smaller font for complex text like "150+25 / 200"
+    lineHeight: 10,
+    flexWrap: 'wrap',
   },
   divider: {
     backgroundColor: colors.gray[300],

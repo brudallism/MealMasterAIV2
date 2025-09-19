@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { FoodLookupResult } from '../../services/api/types';
+import MacroNutritionDisplay from '@/components/molecules/MacroNutritionDisplay';
 
 interface FoodDetailModalProps {
   visible: boolean;
@@ -178,40 +179,19 @@ const FoodDetailModal: React.FC<FoodDetailModalProps> = ({
               Per {quantity} {selectedUnit}
             </Text>
 
-            <View style={styles.nutritionGrid}>
-              <View style={styles.nutritionItem}>
-                <Text style={styles.nutritionValue}>
-                  {calculatedNutrition?.calories || 0}
-                </Text>
-                <Text style={styles.nutritionLabel}>Calories</Text>
-              </View>
-              <View style={styles.nutritionItem}>
-                <Text style={styles.nutritionValue}>
-                  {calculatedNutrition?.protein || 0}g
-                </Text>
-                <Text style={styles.nutritionLabel}>Protein</Text>
-              </View>
-              <View style={styles.nutritionItem}>
-                <Text style={styles.nutritionValue}>
-                  {calculatedNutrition?.carbs || 0}g
-                </Text>
-                <Text style={styles.nutritionLabel}>Carbs</Text>
-              </View>
-              <View style={styles.nutritionItem}>
-                <Text style={styles.nutritionValue}>
-                  {calculatedNutrition?.fat || 0}g
-                </Text>
-                <Text style={styles.nutritionLabel}>Fat</Text>
-              </View>
-              {calculatedNutrition?.fiber !== undefined && calculatedNutrition.fiber > 0 && (
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>
-                    {calculatedNutrition.fiber}g
-                  </Text>
-                  <Text style={styles.nutritionLabel}>Fiber</Text>
-                </View>
-              )}
-            </View>
+            <MacroNutritionDisplay
+              nutrition={{
+                calories: calculatedNutrition?.calories || 0,
+                protein: calculatedNutrition?.protein || 0,
+                carbs: calculatedNutrition?.carbs || 0,
+                fat: calculatedNutrition?.fat || 0,
+                fiber: calculatedNutrition?.fiber || 0
+              }}
+              variant="food-detail"
+              size="medium"
+              showFiber={calculatedNutrition?.fiber !== undefined && calculatedNutrition.fiber > 0}
+              animated={true}
+            />
           </View>
 
           <View style={styles.section}>
@@ -384,31 +364,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     marginBottom: 16,
-  },
-  nutritionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  nutritionItem: {
-    flex: 1,
-    minWidth: 80,
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-  },
-  nutritionValue: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  nutritionLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    textAlign: 'center',
   },
   baseNutritionRow: {
     backgroundColor: '#F9FAFB',

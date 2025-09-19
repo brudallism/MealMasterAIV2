@@ -11,6 +11,14 @@ interface EnhancedCalorieProgressBarProps {
   bubbleTolerance?: number; // Calories tolerance for star indicator (default: 100)
   size?: 'small' | 'medium' | 'large';
   showLabels?: boolean;
+  customDisplayText?: string; // For progress-preview mode
+  // Dual-section support for day progress view
+  dualSection?: {
+    currentValue: number;
+    additionalValue: number;
+    currentText: string;
+    additionalText: string;
+  };
 }
 
 export default function EnhancedCalorieProgressBar({
@@ -20,7 +28,9 @@ export default function EnhancedCalorieProgressBar({
   showBubbles = true,
   bubbleTolerance = 100,
   size = 'medium',
-  showLabels = true
+  showLabels = true,
+  customDisplayText,
+  dualSection
 }: EnhancedCalorieProgressBarProps) {
   const percentage = Math.min((current / target) * 100, 100);
   const displayCurrent = Math.round(current);
@@ -34,48 +44,103 @@ export default function EnhancedCalorieProgressBar({
   // Use consistent calorie color
   const progressColor = colors.macros.calories; // Always use Sage Green for calories
 
-  const renderDashboardVariant = () => (
-    <View style={styles.container}>
-      {showLabels && (
-        <Text style={[styles.calorieBarTitle, sizeConfig.title]}>Daily Calories</Text>
-      )}
+  const renderDashboardVariant = () => {
+    if (dualSection) {
+      // Dual-section rendering for day progress view
+      const currentPercentage = Math.min((dualSection.currentValue / target) * 100, 100);
+      const totalPercentage = Math.min(((dualSection.currentValue + dualSection.additionalValue) / target) * 100, 100);
+      const additionalPercentage = totalPercentage - currentPercentage;
 
-      <View style={[styles.calorieBarWrapper, sizeConfig.wrapper]}>
-        <View style={[styles.calorieBar, sizeConfig.bar]}>
-          <View
-            style={[
-              styles.calorieBarFill,
-              sizeConfig.fill,
-              {
-                width: `${percentage}%`,
-                backgroundColor: progressColor,
-              }
-            ]}
-          />
+      return (
+        <View style={styles.container}>
+          <View style={[styles.calorieBarWrapper, sizeConfig.wrapper]}>
+            <View style={[styles.calorieBar, sizeConfig.bar]}>
+              {/* Current day's calories (left section) */}
+              <View
+                style={[
+                  styles.calorieBarFill,
+                  sizeConfig.fill,
+                  {
+                    width: `${currentPercentage}%`,
+                    backgroundColor: progressColor,
+                  }
+                ]}
+              />
 
-          {showLabels && (
-            <Text style={[styles.calorieBarText, sizeConfig.text]}>
-              {displayCurrent} / {target}
-            </Text>
-          )}
+              {/* Additional meal calories (right section with opacity) - flush against left section */}
+              <View
+                style={[
+                  styles.calorieBarFill,
+                  sizeConfig.fill,
+                  {
+                    width: `${additionalPercentage}%`,
+                    backgroundColor: progressColor,
+                    opacity: 0.6,
+                    left: `${currentPercentage}%`,
+                    position: 'absolute',
+                  }
+                ]}
+              >
+                {/* Text inside the additional meal section */}
+                {showLabels && additionalPercentage > 15 && (
+                  <Text style={[styles.calorieBarTextInside, sizeConfig.text]}>
+                    {dualSection.additionalText}
+                  </Text>
+                )}
+              </View>
 
-          {/* Star bubble for within tolerance */}
-          {showBubbles && isWithinTarget && !isOverTarget && (
-            <View style={[styles.calorieStarBubble, sizeConfig.bubble]}>
-              <Text style={[styles.calorieStarIcon, sizeConfig.bubbleText]}>★</Text>
+              {/* Text for current section - inside the left bar */}
+              {showLabels && currentPercentage > 15 && (
+                <Text style={[styles.calorieBarTextInsideLeft, sizeConfig.text]}>
+                  {dualSection.currentText}
+                </Text>
+              )}
             </View>
-          )}
+          </View>
+        </View>
+      );
+    }
 
-          {/* Warning bubble for over tolerance */}
-          {showBubbles && isOverTarget && (
-            <View style={[styles.calorieWarningBubble, sizeConfig.bubble]}>
-              <Text style={[styles.calorieWarningIcon, sizeConfig.bubbleText]}>!</Text>
-            </View>
-          )}
+    // Standard single-section rendering
+    return (
+      <View style={styles.container}>
+        <View style={[styles.calorieBarWrapper, sizeConfig.wrapper]}>
+          <View style={[styles.calorieBar, sizeConfig.bar]}>
+            <View
+              style={[
+                styles.calorieBarFill,
+                sizeConfig.fill,
+                {
+                  width: `${percentage}%`,
+                  backgroundColor: progressColor,
+                }
+              ]}
+            />
+
+            {showLabels && (
+              <Text style={[styles.calorieBarText, sizeConfig.text]}>
+                {customDisplayText || `${displayCurrent} / ${target} Calories`}
+              </Text>
+            )}
+
+            {/* Star bubble for within tolerance */}
+            {showBubbles && isWithinTarget && !isOverTarget && (
+              <View style={[styles.calorieStarBubble, sizeConfig.bubble]}>
+                <Text style={[styles.calorieStarIcon, sizeConfig.bubbleText]}>★</Text>
+              </View>
+            )}
+
+            {/* Warning bubble for over tolerance */}
+            {showBubbles && isOverTarget && (
+              <View style={[styles.calorieWarningBubble, sizeConfig.bubble]}>
+                <Text style={[styles.calorieWarningIcon, sizeConfig.bubbleText]}>!</Text>
+              </View>
+            )}
+          </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const renderCompactVariant = () => (
     <View style={styles.compactContainer}>
@@ -136,6 +201,7 @@ export default function EnhancedCalorieProgressBar({
     </View>
   );
 
+  // Main component return logic
   switch (variant) {
     case 'compact':
       return renderCompactVariant();
@@ -188,7 +254,7 @@ function getSizeConfig(size: 'small' | 'medium' | 'large') {
       return {
         title: { fontSize: typography.fontSize.lg },
         wrapper: { paddingHorizontal: '3%' },
-        bar: { height: 36, borderRadius: borderRadius.md },
+        bar: { height: 24, borderRadius: borderRadius.md },
         fill: { borderRadius: borderRadius.md },
         text: { fontSize: typography.fontSize.base },
         bubble: { width: 20, height: 20, borderRadius: 10, top: -10, right: -10 },
@@ -208,7 +274,7 @@ function getSizeConfig(size: 'small' | 'medium' | 'large') {
 const styles = StyleSheet.create({
   // Dashboard variant styles
   container: {
-    marginBottom: spacing.base,
+    marginBottom: spacing.sm,
   },
   calorieBarTitle: {
     fontWeight: typography.fontWeight.semibold,
@@ -224,7 +290,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    overflow: 'visible',
+    overflow: 'hidden',
     // Enhanced 3D Floating Effect
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
@@ -244,6 +310,42 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.semibold,
     color: colors.primary[500],
     zIndex: 2,
+  },
+  calorieBarTextLeft: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[500],
+    zIndex: 2,
+    position: 'absolute',
+    left: '5%',
+    textAlign: 'left',
+  },
+  calorieBarTextRight: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary[500],
+    zIndex: 2,
+    position: 'absolute',
+    right: '5%',
+    textAlign: 'right',
+  },
+  calorieBarTextInsideLeft: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.inverse,
+    zIndex: 3,
+    position: 'absolute',
+    left: '5%',
+    top: '50%',
+    transform: [{ translateY: -8 }],
+    textAlign: 'left',
+  },
+  calorieBarTextInside: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.inverse,
+    zIndex: 3,
+    position: 'absolute',
+    right: '5%',
+    top: '50%',
+    transform: [{ translateY: -8 }],
+    textAlign: 'right',
   },
 
   // Star/Warning bubbles for dashboard

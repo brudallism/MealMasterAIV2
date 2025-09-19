@@ -181,7 +181,7 @@ export const typography = {
     '4xl': 32,
     '5xl': 36,
   },
-  
+
   // Font Weights
   fontWeight: {
     normal: '400',
@@ -189,7 +189,7 @@ export const typography = {
     semibold: '600',
     bold: '700',
   },
-  
+
   // Line Heights
   lineHeight: {
     tight: 16,

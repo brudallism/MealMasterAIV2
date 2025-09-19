@@ -179,7 +179,7 @@ export default function DashboardScreen() {
               current={dailyTotals.calories}
               target={goals.daily_calorie_goal}
               variant="dashboard"
-              size="large"
+              size="medium"
               showBubbles={true}
               bubbleTolerance={100}
             />
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   calorieSection: {
-    marginTop: spacing.base,
+    marginTop: spacing.xs,
     marginBottom: spacing.base,
   },
   macroRings: {

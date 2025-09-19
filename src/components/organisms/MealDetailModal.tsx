@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius, shadows } from '@/utils/theme';
 import { Meal } from '@/stores/meal-store';
+import MacroNutritionDisplay from '@/components/molecules/MacroNutritionDisplay';
 
 interface MealDetailModalProps {
   visible: boolean;
@@ -96,21 +97,6 @@ const MealDetailModal: React.FC<MealDetailModalProps> = ({
     onClose();
   };
 
-  const nutritionData = [
-    { label: 'Calories', value: Math.round(meal.calories), unit: 'cal', color: '#FF6B6B' },
-    { label: 'Protein', value: Math.round(meal.protein * 10) / 10, unit: 'g', color: '#4ECDC4' },
-    { label: 'Carbs', value: Math.round(meal.carbs * 10) / 10, unit: 'g', color: '#45B7D1' },
-    { label: 'Fat', value: Math.round(meal.fat * 10) / 10, unit: 'g', color: '#F9CA24' },
-  ];
-
-  if (meal.fiber && meal.fiber > 0) {
-    nutritionData.push({
-      label: 'Fiber',
-      value: Math.round(meal.fiber * 10) / 10,
-      unit: 'g',
-      color: '#95A5A6'
-    });
-  }
 
   return (
     <Modal
@@ -183,19 +169,19 @@ const MealDetailModal: React.FC<MealDetailModalProps> = ({
           {/* Nutrition Information */}
           <View style={styles.nutritionCard}>
             <Text style={styles.sectionTitle}>Nutrition Information</Text>
-            <View style={styles.nutritionGrid}>
-              {nutritionData.map((nutrient, index) => (
-                <View key={index} style={styles.nutritionItem}>
-                  <View style={[styles.nutritionColorBar, { backgroundColor: nutrient.color }]} />
-                  <View style={styles.nutritionInfo}>
-                    <Text style={styles.nutritionLabel}>{nutrient.label}</Text>
-                    <Text style={styles.nutritionValue}>
-                      {nutrient.value} {nutrient.unit}
-                    </Text>
-                  </View>
-                </View>
-              ))}
-            </View>
+            <MacroNutritionDisplay
+              nutrition={{
+                calories: meal.calories,
+                protein: meal.protein,
+                carbs: meal.carbs,
+                fat: meal.fat,
+                fiber: meal.fiber
+              }}
+              variant="basket-meal"
+              size="medium"
+              showFiber={meal.fiber !== undefined && meal.fiber > 0}
+              animated={true}
+            />
           </View>
 
           {/* AI Information */}
@@ -304,6 +290,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing.lg,
+    paddingBottom: spacing.xl, // Extra bottom padding for scroll content
   },
   mealInfoCard: {
     backgroundColor: colors.background.primary,
@@ -376,6 +363,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
+    paddingBottom: spacing.xl, // Extra bottom padding for macro rings
     marginBottom: spacing.base,
     ...shadows.sm,
   },
@@ -384,34 +372,6 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.semibold,
     color: colors.gray[800],
     marginBottom: spacing.base,
-  },
-  nutritionGrid: {
-    gap: spacing.base,
-  },
-  nutritionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  nutritionColorBar: {
-    width: 4,
-    height: 40,
-    borderRadius: 2,
-    marginRight: spacing.base,
-  },
-  nutritionInfo: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  nutritionLabel: {
-    fontSize: typography.fontSize.base,
-    color: colors.gray[700],
-  },
-  nutritionValue: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.gray[900],
   },
   aiInfoCard: {
     backgroundColor: colors.background.primary,
@@ -454,6 +414,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
+    marginBottom: spacing.lg, // Add bottom margin to prevent cutoff
     ...shadows.sm,
   },
   actionButtons: {
