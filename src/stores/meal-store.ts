@@ -45,7 +45,8 @@ interface MealWorkflow {
 
 interface MealState {
   // V0.1 Core State
-  todaysMeals: Meal[];
+  allMeals: Meal[]; // Store all meals
+  todaysMeals: Meal[]; // Computed meals for selected date
   dailyTotals: DailyTotals;
   isLoading: boolean;
   selectedDate: string; // YYYY-MM-DD format
@@ -73,14 +74,35 @@ interface MealState {
   requestMealValidation: (mealId: string) => void;
   addAISuggestion: (suggestion: any) => void;
   clearSuggestions: () => void;
+
+  // Date filtering
+  getMealsForDate: (date: string) => Meal[];
+  refreshSelectedDateMeals: () => void;
+}
+
+// Helper function to get local date in YYYY-MM-DD format
+function getLocalDateString(date: Date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Helper function to filter meals by date
+function filterMealsByDate(meals: Meal[], targetDate: string): Meal[] {
+  return meals.filter(meal => {
+    const mealDate = getLocalDateString(new Date(meal.logged_at));
+    return mealDate === targetDate;
+  });
 }
 
 export const useMealStore = create<MealState>((set, get) => ({
   // V0.1 Core State
+  allMeals: [],
   todaysMeals: [],
   dailyTotals: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
   isLoading: false,
-  selectedDate: new Date().toISOString().split('T')[0],
+  selectedDate: getLocalDateString(),
   
   // V0.2+ AI Workflow State (Initialize Empty)
   activeWorkflows: {},
@@ -90,10 +112,12 @@ export const useMealStore = create<MealState>((set, get) => ({
   // V0.1 Core Actions
   addMeal: (meal: Meal) => {
     set((state) => {
-      const newMeals = [...state.todaysMeals, meal];
-      const newTotals = calculateDailyTotals(newMeals);
+      const newAllMeals = [...state.allMeals, meal];
+      const selectedDateMeals = filterMealsByDate(newAllMeals, state.selectedDate);
+      const newTotals = calculateDailyTotals(selectedDateMeals);
       return {
-        todaysMeals: newMeals,
+        allMeals: newAllMeals,
+        todaysMeals: selectedDateMeals,
         dailyTotals: newTotals
       };
     });
@@ -101,12 +125,14 @@ export const useMealStore = create<MealState>((set, get) => ({
   
   updateMeal: (mealId: string, updates: Partial<Meal>) => {
     set((state) => {
-      const newMeals = state.todaysMeals.map(meal =>
+      const newAllMeals = state.allMeals.map(meal =>
         meal.id === mealId ? { ...meal, ...updates } : meal
       );
-      const newTotals = calculateDailyTotals(newMeals);
+      const selectedDateMeals = filterMealsByDate(newAllMeals, state.selectedDate);
+      const newTotals = calculateDailyTotals(selectedDateMeals);
       return {
-        todaysMeals: newMeals,
+        allMeals: newAllMeals,
+        todaysMeals: selectedDateMeals,
         dailyTotals: newTotals
       };
     });
@@ -114,20 +140,24 @@ export const useMealStore = create<MealState>((set, get) => ({
   
   removeMeal: (mealId: string) => {
     set((state) => {
-      const newMeals = state.todaysMeals.filter(meal => meal.id !== mealId);
-      const newTotals = calculateDailyTotals(newMeals);
+      const newAllMeals = state.allMeals.filter(meal => meal.id !== mealId);
+      const selectedDateMeals = filterMealsByDate(newAllMeals, state.selectedDate);
+      const newTotals = calculateDailyTotals(selectedDateMeals);
       return {
-        todaysMeals: newMeals,
+        allMeals: newAllMeals,
+        todaysMeals: selectedDateMeals,
         dailyTotals: newTotals
       };
     });
   },
   
   setMeals: (meals: Meal[]) => {
-    set(() => {
-      const newTotals = calculateDailyTotals(meals);
+    set((state) => {
+      const selectedDateMeals = filterMealsByDate(meals, state.selectedDate);
+      const newTotals = calculateDailyTotals(selectedDateMeals);
       return {
-        todaysMeals: meals,
+        allMeals: meals,
+        todaysMeals: selectedDateMeals,
         dailyTotals: newTotals
       };
     });
@@ -141,7 +171,17 @@ export const useMealStore = create<MealState>((set, get) => ({
   
   setLoading: (loading: boolean) => set({ isLoading: loading }),
   
-  setSelectedDate: (date: string) => set({ selectedDate: date }),
+  setSelectedDate: (date: string) => {
+    set((state) => {
+      const selectedDateMeals = filterMealsByDate(state.allMeals, date);
+      const newTotals = calculateDailyTotals(selectedDateMeals);
+      return {
+        selectedDate: date,
+        todaysMeals: selectedDateMeals,
+        dailyTotals: newTotals
+      };
+    });
+  },
   
   // V0.2+ AI Workflow Actions (Future Implementation)
   startFoodRecognitionWorkflow: (userInput: string) => {
@@ -223,7 +263,23 @@ export const useMealStore = create<MealState>((set, get) => ({
     }));
   },
   
-  clearSuggestions: () => set({ aiSuggestions: [] })
+  clearSuggestions: () => set({ aiSuggestions: [] }),
+
+  // Date filtering functions
+  getMealsForDate: (date: string) => {
+    const state = get();
+    return filterMealsByDate(state.allMeals, date);
+  },
+
+  refreshSelectedDateMeals: () => {
+    const state = get();
+    const selectedDateMeals = filterMealsByDate(state.allMeals, state.selectedDate);
+    const newTotals = calculateDailyTotals(selectedDateMeals);
+    set({
+      todaysMeals: selectedDateMeals,
+      dailyTotals: newTotals
+    });
+  },
 }));
 
 // Helper function for calculating daily totals

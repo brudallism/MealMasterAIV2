@@ -73,9 +73,16 @@ export const colors = {
   // Macro Colors
   macros: {
     calories: '#FF6B6B',
-    protein: '#4ECDC4', 
+    protein: '#4ECDC4',
     carbs: '#45B7D1',
     fat: '#F9CA24',
+  },
+
+  // Theme colors used by original components
+  theme: {
+    teal: '#4ECDC4',
+    orange: '#F59E0B',
+    white: '#FFFFFF',
   },
   
   // Meal Type Colors

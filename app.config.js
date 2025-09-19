@@ -17,7 +17,10 @@ export default {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.mealmaster.ai"
+      bundleIdentifier: "com.mealmaster.ai",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false
+      }
     },
     android: {
       adaptiveIcon: {
@@ -31,9 +34,14 @@ export default {
     },
     plugins: [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-dev-client",
+      "expo-camera"
     ],
     extra: {
+      eas: {
+        projectId: "de3efcbe-aeb7-463a-834b-d10742ea26a5"
+      },
       EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
       EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       EXPO_PUBLIC_OPENAI_API_KEY: process.env.EXPO_PUBLIC_OPENAI_API_KEY,

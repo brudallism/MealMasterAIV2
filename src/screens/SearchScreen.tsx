@@ -15,7 +15,7 @@ import { useSearchStore } from '../stores/search-store';
 import { useCart } from '../stores/cart-store';
 import FoodDetailModal from '../components/organisms/FoodDetailModal';
 import MealBasketModal from '../components/organisms/MealBasketModal';
-// import BarcodeScanner from '../components/organisms/BarcodeScanner'; // Temporarily disabled until native modules are rebuilt
+import BarcodeScanner from '../components/organisms/BarcodeScanner';
 import { FloatingChatBubbleWrapper } from '../components/atoms/FloatingChatBubble';
 
 export default function SearchScreen() {
@@ -254,8 +254,8 @@ export default function SearchScreen() {
       }
       
       // Remove duplicates by fdcId
-      const uniqueFoods = allFoods.reduce((acc, food) => {
-        if (!acc.find(f => f.fdcId === food.fdcId)) {
+      const uniqueFoods = allFoods.reduce((acc: any[], food: any) => {
+        if (!acc.find((f: any) => f.fdcId === food.fdcId)) {
           acc.push(food);
         }
         return acc;
@@ -402,6 +402,8 @@ export default function SearchScreen() {
   const handleCloseFoodModal = () => {
     setShowFoodModal(false);
     setSelectedFood(null);
+    // Reopen barcode scanner for continued scanning
+    setShowBarcodeScanner(true);
   };
 
   const handleAddToMeal = (food: FoodLookupResult, quantity: number, unit: string) => {
@@ -425,8 +427,13 @@ export default function SearchScreen() {
     
     // Add to cart with specified serving
     addToCart(convertedFood, quantity, unit);
-    
+
     console.log(`Added to meal: ${food.name} (${quantity} ${unit})`);
+
+    // Close food modal and reopen scanner for continued scanning
+    setShowFoodModal(false);
+    setSelectedFood(null);
+    setShowBarcodeScanner(true);
   };
 
   const handleAddToCart = (food: FoodLookupResult) => {
@@ -455,11 +462,12 @@ export default function SearchScreen() {
   };
 
   const openBarcodeScanner = () => {
-    // setShowBarcodeScanner(true); // Temporarily disabled
-    alert('Barcode scanner will be available after rebuilding the app with native modules');
+    setShowBarcodeScanner(true);
   };
 
   const handleBarcodeProduct = (product: FoodLookupResult) => {
+    console.log('🎯 handleBarcodeProduct called with product:', product.name);
+
     // Convert and add to recent foods with safety guards
     const convertedFood = {
       id: product.id,
@@ -475,6 +483,16 @@ export default function SearchScreen() {
       confidence: 1
     };
     addRecentFood(convertedFood);
+
+    console.log('📝 Setting selectedFood to:', product.name);
+    console.log('📱 Closing barcode scanner and showing food modal');
+
+    // Close barcode scanner and show food detail modal
+    setShowBarcodeScanner(false);
+    setSelectedFood(product);
+    setShowFoodModal(true);
+
+    console.log('✅ Modal state updated - scanner closed, food modal opened');
   };
 
   const renderFoodItem = ({ item }: { item: FoodLookupResult }) => (
@@ -630,12 +648,11 @@ export default function SearchScreen() {
           )}
         />
 
-        {/* <BarcodeScanner
+        <BarcodeScanner
           visible={showBarcodeScanner}
           onClose={() => setShowBarcodeScanner(false)}
           onProductFound={handleBarcodeProduct}
-        /> */}
-        {/* Barcode scanner temporarily disabled until native modules are rebuilt */}
+        />
         
         <FoodDetailModal
           visible={showFoodModal}
@@ -643,6 +660,18 @@ export default function SearchScreen() {
           onClose={handleCloseFoodModal}
           onAddToMeal={handleAddToMeal}
         />
+
+        {/* Debug info - remove in production */}
+        {__DEV__ && (
+          <View style={{ position: 'absolute', top: 100, right: 10, backgroundColor: 'rgba(0,0,0,0.7)', padding: 10, borderRadius: 5 }}>
+            <Text style={{ color: 'white', fontSize: 12 }}>
+              showFoodModal: {showFoodModal.toString()}
+            </Text>
+            <Text style={{ color: 'white', fontSize: 12 }}>
+              selectedFood: {selectedFood?.name || 'null'}
+            </Text>
+          </View>
+        )}
 
         <MealBasketModal
           visible={showBasketModal}

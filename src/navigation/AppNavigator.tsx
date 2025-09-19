@@ -5,8 +5,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import DashboardScreen from '@/screens/DashboardScreen';
-import ChatScreen from '@/screens/ChatScreen';
 import PlansScreen from '@/screens/PlansScreen';
+import SearchScreen from '@/screens/SearchScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -20,8 +20,8 @@ export default function AppNavigator() {
 
             if (route.name === 'Dashboard') {
               iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'Chat') {
-              iconName = focused ? 'chatbubble' : 'chatbubble-outline';
+            } else if (route.name === 'Search') {
+              iconName = focused ? 'search' : 'search-outline';
             } else if (route.name === 'Plans') {
               iconName = focused ? 'calendar' : 'calendar-outline';
             } else {
@@ -35,18 +35,18 @@ export default function AppNavigator() {
           headerShown: false,
         })}
       >
-        <Tab.Screen 
-          name="Dashboard" 
+        <Tab.Screen
+          name="Dashboard"
           component={DashboardScreen}
           options={{ tabBarLabel: 'Dashboard' }}
         />
-        <Tab.Screen 
-          name="Chat" 
-          component={ChatScreen}
-          options={{ tabBarLabel: 'AI Coach' }}
+        <Tab.Screen
+          name="Search"
+          component={SearchScreen}
+          options={{ tabBarLabel: 'Search' }}
         />
-        <Tab.Screen 
-          name="Plans" 
+        <Tab.Screen
+          name="Plans"
           component={PlansScreen}
           options={{ tabBarLabel: 'Meal Plans' }}
         />

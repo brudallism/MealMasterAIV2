@@ -1,6 +1,7 @@
 // src/components/atoms/MacroRing.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 
 interface MacroRingProps {
   label: string;
@@ -11,38 +12,54 @@ interface MacroRingProps {
   size?: 'small' | 'medium' | 'large';
 }
 
-export default function MacroRing({ 
-  label, 
-  current, 
-  goal, 
-  color, 
-  unit = '', 
-  size = 'medium' 
+export default function MacroRing({
+  label,
+  current,
+  goal,
+  color,
+  unit = '',
+  size = 'medium'
 }: MacroRingProps) {
   const percentage = Math.min((current / goal) * 100, 100);
   const displayCurrent = Math.round(current);
   const isOverGoal = current > goal;
-  
+
   const sizeStyles = getSizeStyles(size);
-  const strokeWidth = size === 'large' ? 6 : size === 'medium' ? 4 : 3;
-  
+  const { radius, strokeWidth, svgSize } = getSvgConfig(size);
+
+  // Calculate circumference and stroke dash array for progress
+  const circumference = 2 * Math.PI * radius;
+  const strokeDasharray = circumference;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
   return (
     <View style={styles.container}>
-      <View style={[styles.ringContainer, sizeStyles.container, { borderColor: color }]}>
-        <View 
-          style={[
-            styles.ringFill, 
-            sizeStyles.fill,
-            { 
-              borderColor: color,
-              borderTopWidth: percentage >= 25 ? strokeWidth : 0,
-              borderRightWidth: percentage >= 50 ? strokeWidth : 0,
-              borderBottomWidth: percentage >= 75 ? strokeWidth : 0,
-              borderLeftWidth: percentage >= 100 ? strokeWidth : 0,
-            }
-          ]}
-        />
-        <View style={styles.ringCenter}>
+      <View style={[styles.ringContainer, sizeStyles.container]}>
+        <Svg width={svgSize} height={svgSize} viewBox={`0 0 ${svgSize} ${svgSize}`}>
+          {/* Background circle */}
+          <Circle
+            cx={svgSize / 2}
+            cy={svgSize / 2}
+            r={radius}
+            stroke="#E5E7EB"
+            strokeWidth={strokeWidth}
+            fill="transparent"
+          />
+          {/* Progress circle */}
+          <Circle
+            cx={svgSize / 2}
+            cy={svgSize / 2}
+            r={radius}
+            stroke={isOverGoal ? "#EF4444" : color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={strokeDasharray}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            fill="transparent"
+            transform={`rotate(-90 ${svgSize / 2} ${svgSize / 2})`}
+          />
+        </Svg>
+        <View style={[styles.ringCenter, sizeStyles.center]}>
           <Text style={[styles.ringPercentage, sizeStyles.percentage, isOverGoal && { color: '#EF4444' }]}>
             {Math.round(percentage)}%
           </Text>
@@ -56,28 +73,51 @@ export default function MacroRing({
   );
 }
 
+function getSvgConfig(size: 'small' | 'medium' | 'large') {
+  switch (size) {
+    case 'small':
+      return {
+        svgSize: 48,
+        radius: 18,
+        strokeWidth: 3
+      };
+    case 'large':
+      return {
+        svgSize: 80,
+        radius: 32,
+        strokeWidth: 5
+      };
+    default: // medium
+      return {
+        svgSize: 60,
+        radius: 22,
+        strokeWidth: 4
+      };
+  }
+}
+
 function getSizeStyles(size: 'small' | 'medium' | 'large') {
   switch (size) {
     case 'small':
       return {
-        container: { width: 48, height: 48, borderWidth: 2 },
-        fill: { width: 44, height: 44 },
+        container: { width: 48, height: 48 },
+        center: { width: 48, height: 48 },
         percentage: { fontSize: 10 },
         label: { fontSize: 11 },
         value: { fontSize: 10 }
       };
     case 'large':
       return {
-        container: { width: 80, height: 80, borderWidth: 4 },
-        fill: { width: 72, height: 72 },
+        container: { width: 80, height: 80 },
+        center: { width: 80, height: 80 },
         percentage: { fontSize: 14 },
         label: { fontSize: 14 },
         value: { fontSize: 12 }
       };
     default: // medium
       return {
-        container: { width: 60, height: 60, borderWidth: 3 },
-        fill: { width: 54, height: 54 },
+        container: { width: 60, height: 60 },
+        center: { width: 60, height: 60 },
         percentage: { fontSize: 12 },
         label: { fontSize: 12 },
         value: { fontSize: 11 }
@@ -91,19 +131,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   ringContainer: {
-    borderRadius: 50,
-    borderColor: '#E5E5E5',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
     position: 'relative',
   },
-  ringFill: {
-    position: 'absolute',
-    borderRadius: 50,
-    borderWidth: 0,
-  },
   ringCenter: {
+    position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
   },

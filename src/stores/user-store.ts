@@ -7,7 +7,8 @@ interface UserGoals {
   protein_goal: number;
   carb_goal: number;
   fat_goal: number;
-  
+  fiber_goal: number;
+
   // V0.2+ Advanced Goals (Expansion Hooks)
   weight_goal?: number;
   activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
@@ -146,7 +147,8 @@ export const useUserStore = create<UserState>((set, get) => ({
     daily_calorie_goal: 2000,
     protein_goal: 150,
     carb_goal: 200,
-    fat_goal: 65
+    fat_goal: 65,
+    fiber_goal: 25
   },
   isAuthenticated: false,
   isLoading: false,
@@ -398,7 +400,8 @@ export const useUserStore = create<UserState>((set, get) => ({
         daily_calorie_goal: 2000,
         protein_goal: 150,
         carb_goal: 200,
-        fat_goal: 65
+        fat_goal: 65,
+        fiber_goal: 25
       }
     });
   }
