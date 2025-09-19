@@ -1,6 +1,7 @@
 // src/components/molecules/MealCard.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '@/utils/theme';
 
 export interface Meal {
   id: string;
@@ -31,10 +32,10 @@ export default function MealCard({
   variant = 'default' 
 }: MealCardProps) {
   const mealTypeColors = {
-    breakfast: '#F59E0B',
-    lunch: '#10B981',
-    dinner: '#6366F1',
-    snack: '#EC4899'
+    breakfast: colors.mealTypes.breakfast,   // Golden Ochre
+    lunch: colors.mealTypes.lunch,           // Sage Green
+    dinner: colors.mealTypes.dinner,         // Terracotta
+    snack: colors.mealTypes.snack            // Bark Brown
   };
 
   const formatMacros = (calories: number, protein: number, carbs: number, fat: number) => {
@@ -119,54 +120,55 @@ export default function MealCard({
 
 const styles = StyleSheet.create({
   mealCard: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    marginBottom: 8,
-    borderRadius: 8,
+    backgroundColor: colors.background.secondary, // Cream Linen
+    padding: spacing.base,
+    marginBottom: spacing.sm,
+    borderRadius: borderRadius.md,
     borderLeftWidth: 4,
-    borderLeftColor: '#4F46E5',
+    borderLeftColor: colors.primary[500], // Default Deep Forest Green
+    ...shadows.sm,
   },
   compactCard: {
-    padding: 12,
-    marginBottom: 4,
+    padding: spacing.sm,
+    marginBottom: spacing.xs,
   },
   mealHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   mealName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary, // Deep Brown
     flex: 1,
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   compactMealName: {
-    fontSize: 14,
-    marginBottom: 4,
+    fontSize: typography.fontSize.sm,
+    marginBottom: spacing.xs,
   },
   mealTypeContainer: {
-    backgroundColor: 'rgba(79, 70, 229, 0.1)',
-    paddingHorizontal: 8,
+    backgroundColor: colors.supporting.warmBeige, // Warm Beige background
+    paddingHorizontal: spacing.sm,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: borderRadius.xl,
   },
   mealType: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
     textTransform: 'uppercase',
   },
   mealMacros: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary, // Bark Brown
+    marginBottom: spacing.sm,
     lineHeight: 18,
   },
   compactMacros: {
-    fontSize: 12,
-    marginBottom: 4,
+    fontSize: typography.fontSize.xs,
+    marginBottom: spacing.xs,
   },
   mealFooter: {
     flexDirection: 'row',
@@ -174,8 +176,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mealTime: {
-    fontSize: 12,
-    color: '#888',
+    fontSize: typography.fontSize.xs,
+    color: colors.text.tertiary, // Sage Green
   },
   confidenceContainer: {
     flexDirection: 'row',
@@ -183,25 +185,25 @@ const styles = StyleSheet.create({
   },
   confidenceText: {
     fontSize: 11,
-    color: '#F59E0B',
-    marginRight: 4,
+    color: colors.warning[500], // Golden Ochre
+    marginRight: spacing.xs,
   },
   unconfirmedIndicator: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#EF4444',
+    backgroundColor: colors.error[500], // Terracotta
   },
   quantityText: {
     fontSize: 11,
-    color: '#888',
+    color: colors.text.tertiary, // Sage Green
     fontStyle: 'italic',
   },
   notesText: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary, // Bark Brown
     fontStyle: 'italic',
-    marginTop: 8,
+    marginTop: spacing.sm,
     lineHeight: 16,
   },
 });

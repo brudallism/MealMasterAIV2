@@ -1,103 +1,170 @@
 // src/utils/theme.ts
-// Meal Master AI Design System - V0.1
+// Meal Master AI Design System - Earth-Toned Brand
 
 export const colors = {
-  // Primary Brand Colors
+  // Primary Brand Colors - Deep Forest Green
   primary: {
-    50: '#EEF2FF',
-    100: '#E0E7FF',
-    200: '#C7D2FE',
-    300: '#A5B4FC',
-    400: '#818CF8',
-    500: '#4F46E5', // Main brand color
-    600: '#4338CA',
-    700: '#3730A3',
-    800: '#312E81',
-    900: '#1E1B4B',
-  },
-  
-  // Semantic Colors
-  success: {
-    50: '#ECFDF5',
-    100: '#D1FAE5',
-    200: '#A7F3D0',
-    300: '#6EE7B7',
-    400: '#34D399',
-    500: '#10B981',
-    600: '#059669',
-    700: '#047857',
-    800: '#065F46',
-    900: '#064E3B',
-  },
-  
-  warning: {
-    50: '#FFFBEB',
-    100: '#FEF3C7',
-    200: '#FDE68A',
-    300: '#FCD34D',
-    400: '#FBBF24',
-    500: '#F59E0B',
-    600: '#D97706',
-    700: '#B45309',
-    800: '#92400E',
-    900: '#78350F',
-  },
-  
-  error: {
-    50: '#FEF2F2',
-    100: '#FEE2E2',
-    200: '#FECACA',
-    300: '#FCA5A5',
-    400: '#F87171',
-    500: '#EF4444',
-    600: '#DC2626',
-    700: '#B91C1C',
-    800: '#991B1B',
-    900: '#7F1D1D',
-  },
-  
-  // Neutral Grays
-  gray: {
-    50: '#F9FAFB',
-    100: '#F3F4F6',
-    200: '#E5E7EB',
-    300: '#D1D5DB',
-    400: '#9CA3AF',
-    500: '#6B7280',
-    600: '#4B5563',
-    700: '#374151',
-    800: '#1F2937',
-    900: '#111827',
-  },
-  
-  // Macro Colors
-  macros: {
-    calories: '#FF6B6B',
-    protein: '#4ECDC4',
-    carbs: '#45B7D1',
-    fat: '#F9CA24',
+    50: '#F3F5F2',
+    100: '#E6EBE2',
+    200: '#CCD7C5',
+    300: '#B3C3A8',
+    400: '#99AF8B',
+    500: '#213529', // Main brand color - Deep Forest
+    600: '#1C2E23',
+    700: '#17261D',
+    800: '#121F17',
+    900: '#0D1711',
   },
 
-  // Theme colors used by original components
-  theme: {
-    teal: '#4ECDC4',
-    orange: '#F59E0B',
-    white: '#FFFFFF',
+  // Secondary Color - Terracotta Clay
+  secondary: {
+    50: '#FDF6F4',
+    100: '#FCEDE9',
+    200: '#F8DBD3',
+    300: '#F4C9BD',
+    400: '#F0B7A7',
+    500: '#B95D40', // Terracotta Clay
+    600: '#A45539',
+    700: '#8F4C32',
+    800: '#7A442B',
+    900: '#653B24',
   },
-  
-  // Meal Type Colors
-  mealTypes: {
-    breakfast: '#F59E0B',
-    lunch: '#10B981',
-    dinner: '#6366F1',
-    snack: '#EC4899',
+
+  // Supporting Colors
+  supporting: {
+    barkBrown: '#5C4033',     // Headers, sub-headers, icon outlines
+    sageGreen: '#9CAF88',     // Calm accents, charts, hover borders
+    goldenOchre: '#E1A948',   // Energy accent, nutrient highlights
+    creamLinen: '#F3EFE9',    // Card backgrounds, floating elements
+    warmBeige: '#E8DCCF',     // App background base
   },
-  
+
+  // Text Colors
+  text: {
+    primary: '#1A1410',       // Deep Brown (Almost Black) - primary text
+    secondary: '#5C4033',     // Bark Brown - secondary text
+    tertiary: '#9CAF88',      // Sage Green - subtle text
+    inverse: '#F3EFE9',       // Cream Linen - text on dark backgrounds
+  },
+
   // Background Colors
   background: {
-    primary: '#FFFFFF',
-    secondary: '#F9FAFB',
-    tertiary: '#F3F4F6',
+    primary: '#E8DCCF',       // Warm Beige - main app background
+    secondary: '#F3EFE9',     // Cream Linen - card backgrounds
+    tertiary: '#FFFFFF',      // Pure white for input fields
+    overlay: 'rgba(26, 20, 16, 0.5)', // Semi-transparent overlay
+  },
+
+  // Macro Ring Colors (from your specification)
+  macros: {
+    protein: '#213529',       // Deep Forest - Protein
+    fiber: '#5C4033',         // Bark Brown - Fiber
+    calories: '#9CAF88',      // Sage Green - Calories
+    carbs: '#B95D40',         // Terracotta Clay - Carbs
+    fats: '#E1A948',          // Golden Ochre - Fats
+  },
+
+  // Semantic Colors (earth-toned versions)
+  success: {
+    50: '#F1F5F0',
+    100: '#E3EBE1',
+    200: '#C7D7C3',
+    300: '#ABC3A5',
+    500: '#9CAF88',           // Sage Green for success
+    600: '#8A9C78',
+    700: '#788968',
+    800: '#667658',
+    900: '#546348',
+  },
+
+  warning: {
+    50: '#FDF9F0',
+    100: '#FBF3E1',
+    200: '#F7E7C3',
+    300: '#F3DBA5',
+    500: '#E1A948',           // Golden Ochre for warnings
+    600: '#CB9741',
+    700: '#B5853A',
+    800: '#9F7333',
+    900: '#89612C',
+  },
+
+  error: {
+    50: '#FDF5F3',
+    100: '#FCEBE7',
+    200: '#F8D7CF',
+    300: '#F4C3B7',
+    500: '#B95D40',           // Terracotta for errors
+    600: '#A75539',
+    700: '#954C32',
+    800: '#83442B',
+    900: '#713B24',
+  },
+
+  // Neutral Grays (warmer tones to match earth palette)
+  gray: {
+    50: '#F9F8F6',
+    100: '#F3F1EE',
+    200: '#E7E3DD',
+    300: '#DBD5CC',
+    400: '#B8B0A5',
+    500: '#958B7E',
+    600: '#766D62',
+    700: '#5C544B',
+    800: '#423C35',
+    900: '#28241F',
+  },
+
+  // Meal Type Colors (earth-toned)
+  mealTypes: {
+    breakfast: '#E1A948',     // Golden Ochre - morning energy
+    lunch: '#9CAF88',         // Sage Green - midday calm
+    dinner: '#B95D40',        // Terracotta - evening warmth
+    snack: '#5C4033',         // Bark Brown - grounding snacks
+  },
+
+  // Interactive States
+  interactive: {
+    hover: 'rgba(33, 53, 41, 0.2)',      // Deep Forest Green 20% opacity
+    pressed: 'rgba(33, 53, 41, 0.4)',     // Deep Forest Green 40% opacity
+    disabled: 0.5,                        // 50% opacity for disabled states
+  },
+
+  // Loading & Processing States
+  loading: {
+    spinner: '#213529',                   // Deep Forest Green
+    background: '#E8DCCF',               // Warm Beige with pulse animation
+    skeleton: '#F3EFE9',                 // Cream Linen with shimmer
+  },
+
+  // Calorie Target States (distinct from macro colors)
+  calorieStatus: {
+    withinRange: '#9CAF88',              // Sage Green (within ±100 calories)
+    underTarget: '#D4A440',              // Darker Golden Ochre for low calories
+    overTarget: '#C4523A',               // More vibrant/redder Terracotta for over target
+  },
+
+  // Notification & Alert Backgrounds
+  notifications: {
+    success: '#9CAF88',                  // Sage Green backgrounds
+    warning: '#E1A948',                  // Golden Ochre backgrounds
+    error: '#B95D40',                    // Terracotta Clay backgrounds
+    info: '#F3EFE9',                     // Cream Linen with Deep Forest text
+  },
+
+  // Form & Input Colors
+  forms: {
+    validBorder: '#9CAF88',              // Sage Green for valid inputs
+    invalidBorder: '#B95D40',            // Terracotta Clay for invalid inputs
+    focusBorder: '#213529',              // Deep Forest Green for focus
+    placeholder: 'rgba(92, 64, 51, 0.6)', // Bark Brown 60% opacity
+  },
+
+  // Legacy support for existing components
+  theme: {
+    teal: '#9CAF88',          // Map to Sage Green
+    orange: '#E1A948',        // Map to Golden Ochre
+    white: '#F3EFE9',         // Map to Cream Linen
   },
 };
 
@@ -179,52 +246,127 @@ export const shadows = {
   },
 };
 
-// Common component styles
+// Common component styles with earth-toned theme
 export const commonStyles = {
+  // Card styles
   card: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background.secondary, // Cream Linen cards
     borderRadius: borderRadius.md,
     padding: spacing.base,
     marginBottom: spacing.sm,
     ...shadows.sm,
   },
-  
+
   section: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background.secondary, // Cream Linen sections
     padding: spacing.lg,
     marginBottom: spacing.sm,
   },
-  
+
   sectionTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.gray[800],
+    color: colors.text.secondary, // Bark Brown headers
     marginBottom: spacing.base,
   },
-  
+
+  // Screen layouts
   screenContainer: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.background.primary, // Warm Beige background
   },
-  
+
   screenHeader: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background.secondary, // Cream Linen header
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.base,
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray[200],
+    borderBottomColor: colors.supporting.sageGreen + '30', // 30% opacity
   },
-  
+
   screenTitle: {
     fontSize: typography.fontSize['3xl'],
     fontWeight: typography.fontWeight.bold,
-    color: colors.gray[800],
+    color: colors.text.primary, // Deep Brown titles
     marginBottom: spacing.xs,
   },
-  
+
   screenSubtitle: {
     fontSize: typography.fontSize.base,
-    color: colors.gray[600],
+    color: colors.text.secondary, // Bark Brown subtitles
+  },
+
+  // Button styles for consistent theming
+  primaryButton: {
+    backgroundColor: colors.primary[500], // Deep Forest Green
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.base,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
+  },
+
+  secondaryButton: {
+    backgroundColor: colors.secondary[500], // Terracotta Clay
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.base,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
+  },
+
+  outlineButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.primary[500], // Deep Forest Green border
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.base,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Text styles
+  primaryButtonText: {
+    color: colors.text.inverse, // Cream Linen on dark buttons
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+  },
+
+  outlineButtonText: {
+    color: colors.primary[500], // Deep Forest Green
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+  },
+
+  // Input styles
+  textInput: {
+    backgroundColor: colors.background.tertiary, // Pure white inputs
+    borderWidth: 1,
+    borderColor: colors.supporting.sageGreen + '50', // 50% opacity Sage Green
+    borderRadius: borderRadius.base,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
+  },
+
+  // Navigation styles
+  tabBar: {
+    backgroundColor: colors.background.secondary, // Cream Linen
+    borderTopWidth: 1,
+    borderTopColor: colors.supporting.sageGreen + '30',
+    paddingVertical: spacing.xs,
+  },
+
+  activeTabIcon: {
+    color: colors.primary[500], // Deep Forest Green for active
+  },
+
+  inactiveTabIcon: {
+    color: colors.supporting.barkBrown, // Bark Brown for inactive
   },
 };
 

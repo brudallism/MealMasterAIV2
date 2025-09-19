@@ -23,6 +23,7 @@ export default function SearchScreen() {
   const [showFoodModal, setShowFoodModal] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodLookupResult | null>(null);
   const [showBasketModal, setShowBasketModal] = useState(false);
+  const [wasOpenedFromBarcode, setWasOpenedFromBarcode] = useState(false);
   
   const {
     currentQuery,
@@ -397,13 +398,16 @@ export default function SearchScreen() {
   const handleFoodItemClick = (food: FoodLookupResult) => {
     setSelectedFood(food);
     setShowFoodModal(true);
+    setWasOpenedFromBarcode(false); // Not from barcode scanner
   };
 
   const handleCloseFoodModal = () => {
     setShowFoodModal(false);
     setSelectedFood(null);
-    // Reopen barcode scanner for continued scanning
-    setShowBarcodeScanner(true);
+    // Only reopen barcode scanner if it was originally opened from barcode scanner
+    if (wasOpenedFromBarcode) {
+      setShowBarcodeScanner(true);
+    }
   };
 
   const handleAddToMeal = (food: FoodLookupResult, quantity: number, unit: string) => {
@@ -430,10 +434,12 @@ export default function SearchScreen() {
 
     console.log(`Added to meal: ${food.name} (${quantity} ${unit})`);
 
-    // Close food modal and reopen scanner for continued scanning
+    // Close food modal and only reopen scanner if it was originally opened from barcode scanner
     setShowFoodModal(false);
     setSelectedFood(null);
-    setShowBarcodeScanner(true);
+    if (wasOpenedFromBarcode) {
+      setShowBarcodeScanner(true);
+    }
   };
 
   const handleAddToCart = (food: FoodLookupResult) => {
@@ -491,6 +497,7 @@ export default function SearchScreen() {
     setShowBarcodeScanner(false);
     setSelectedFood(product);
     setShowFoodModal(true);
+    setWasOpenedFromBarcode(true); // Mark that this was opened from barcode scanner
 
     console.log('✅ Modal state updated - scanner closed, food modal opened');
   };

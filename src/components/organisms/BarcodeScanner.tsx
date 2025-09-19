@@ -156,18 +156,20 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     <Modal visible={visible} animationType="slide">
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => {
-              console.log('🚫 Close button pressed');
-              onClose();
-            }}
-          >
-            <Ionicons name="close" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
           <Text style={styles.headerTitleWhite}>Scan Barcode</Text>
-          <View style={styles.headerSpacer} />
         </View>
+
+        {/* Close button positioned separately */}
+        <TouchableOpacity
+          style={styles.closeButtonAbsolute}
+          onPress={() => {
+            console.log('🚫 Close button pressed - calling onClose');
+            onClose();
+          }}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="close" size={28} color="#FFFFFF" />
+        </TouchableOpacity>
 
         <View style={styles.scannerContainer}>
           <CameraView
@@ -235,7 +237,24 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   closeButton: {
-    padding: 8,
+    padding: 12,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeButtonAbsolute: {
+    position: 'absolute',
+    top: 80,
+    right: 20,
+    zIndex: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 25,
+    padding: 12,
+    minWidth: 50,
+    minHeight: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     flex: 1,

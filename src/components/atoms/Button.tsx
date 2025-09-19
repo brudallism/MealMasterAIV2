@@ -1,6 +1,7 @@
 // src/components/atoms/Button.tsx
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { colors, spacing, borderRadius, typography, shadows } from '@/utils/theme';
 
 interface ButtonProps {
   title: string;
@@ -56,55 +57,56 @@ export default function Button({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
+    ...shadows.sm,
   },
-  
-  // Variants
+
+  // Variants - Earth-toned theme
   primary: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: colors.primary[500], // Deep Forest Green
     borderWidth: 1,
-    borderColor: '#4F46E5',
+    borderColor: colors.primary[500],
   },
   secondary: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.secondary[500], // Terracotta Clay
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.secondary[500],
   },
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#4F46E5',
+    borderColor: colors.primary[500], // Deep Forest Green border
   },
   ghost: {
     backgroundColor: 'transparent',
     borderWidth: 0,
   },
   danger: {
-    backgroundColor: '#EF4444',
+    backgroundColor: colors.error[500], // Terracotta-based error
     borderWidth: 1,
-    borderColor: '#EF4444',
+    borderColor: colors.error[500],
   },
-  
+
   // Sizes
   small: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     minHeight: 32,
   },
   medium: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
     minHeight: 40,
   },
   large: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
     minHeight: 48,
   },
-  
+
   // States
   disabled: {
     opacity: 0.5,
@@ -115,47 +117,47 @@ const styles = StyleSheet.create({
   fullWidth: {
     alignSelf: 'stretch',
   },
-  
+
   // Text styles
   text: {
-    fontWeight: '600',
+    fontWeight: typography.fontWeight.semibold,
     textAlign: 'center',
   },
-  
+
   // Variant text styles
   primaryText: {
-    color: '#FFFFFF',
+    color: colors.text.inverse, // Cream Linen on dark buttons
   },
   secondaryText: {
-    color: '#374151',
+    color: colors.text.inverse, // Cream Linen on terracotta
   },
   outlineText: {
-    color: '#4F46E5',
+    color: colors.primary[500], // Deep Forest Green
   },
   ghostText: {
-    color: '#4F46E5',
+    color: colors.primary[500], // Deep Forest Green
   },
   dangerText: {
-    color: '#FFFFFF',
+    color: colors.text.inverse, // Cream Linen on error
   },
-  
+
   // Size text styles
   smallText: {
-    fontSize: 12,
+    fontSize: typography.fontSize.xs,
   },
   mediumText: {
-    fontSize: 14,
+    fontSize: typography.fontSize.sm,
   },
   largeText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.base,
   },
-  
+
   disabledText: {
-    color: '#9CA3AF',
+    color: colors.gray[400],
   },
-  
+
   icon: {
-    marginRight: 8,
-    fontSize: 16,
+    marginRight: spacing.sm,
+    fontSize: typography.fontSize.base,
   },
 });

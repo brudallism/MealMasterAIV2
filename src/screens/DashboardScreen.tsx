@@ -6,8 +6,8 @@ import { useMealStore } from '@/stores/meal-store';
 import { useUserStore } from '@/stores/user-store';
 import { useAIStore } from '@/stores/ai-store';
 import { useCart } from '@/stores/cart-store';
-import MacroRing from '@/components/atoms/MacroRing';
-import CalorieProgressBar from '@/components/atoms/CalorieProgressBar';
+import EnhancedMacroRing from '@/components/atoms/EnhancedMacroRing';
+import EnhancedCalorieProgressBar from '@/components/atoms/EnhancedCalorieProgressBar';
 import MealCard from '@/components/molecules/MealCard';
 import WeeklyCalendar from '@/components/molecules/WeeklyCalendar';
 import MealDetailModal from '@/components/organisms/MealDetailModal';
@@ -143,8 +143,8 @@ export default function DashboardScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.theme.teal}
-            colors={[colors.theme.teal]}
+            tintColor={colors.primary[500]}
+            colors={[colors.primary[500]]}
           />
         }
       >
@@ -157,7 +157,7 @@ export default function DashboardScreen() {
             style={styles.profileButton}
             onPress={() => setShowSettings(true)}
           >
-            <Ionicons name="person-circle-outline" size={32} color={colors.theme.teal} />
+            <Ionicons name="person-circle-outline" size={32} color={colors.primary[500]} />
           </TouchableOpacity>
         </View>
 
@@ -173,46 +173,55 @@ export default function DashboardScreen() {
             {selectedDate === todayLocal ? "Today's Progress" : `Progress for ${new Date(selectedDate).toLocaleDateString()}`}
           </Text>
 
-          {/* Calorie Progress Bar */}
+          {/* Enhanced Calorie Progress Bar */}
           <View style={styles.calorieSection}>
-            <CalorieProgressBar
+            <EnhancedCalorieProgressBar
               current={dailyTotals.calories}
-              goal={goals.daily_calorie_goal}
-              variant="horizontal"
+              target={goals.daily_calorie_goal}
+              variant="dashboard"
               size="large"
-              color="#FF6B6B"
+              showBubbles={true}
+              bubbleTolerance={100}
             />
           </View>
 
-          {/* Macro Rings with Fiber */}
+          {/* Enhanced Macro Rings with Fiber */}
           <View style={styles.macroRings}>
-            <MacroRing
+            <EnhancedMacroRing
               label="Protein"
               current={dailyTotals.protein}
-              goal={goals.protein_goal}
-              color="#4ECDC4"
-              unit="g"
+              target={goals.protein_goal}
+              color={colors.macros.protein}
+              variant="progress"
+              animated={true}
+              showStatusIndicators={true}
             />
-            <MacroRing
+            <EnhancedMacroRing
               label="Carbs"
               current={dailyTotals.carbs}
-              goal={goals.carb_goal}
-              color="#45B7D1"
-              unit="g"
+              target={goals.carb_goal}
+              color={colors.macros.carbs}
+              variant="progress"
+              animated={true}
+              showStatusIndicators={true}
             />
-            <MacroRing
+            <EnhancedMacroRing
               label="Fat"
               current={dailyTotals.fat}
-              goal={goals.fat_goal}
-              color="#F9CA24"
-              unit="g"
+              target={goals.fat_goal}
+              color={colors.macros.fats}
+              variant="progress"
+              animated={true}
+              showStatusIndicators={true}
             />
-            <MacroRing
+            <EnhancedMacroRing
               label="Fiber"
               current={dailyTotals.fiber}
-              goal={goals.fiber_goal}
-              color="#8B7D6B"
-              unit="g"
+              target={goals.fiber_goal}
+              color={colors.macros.fiber}
+              variant="progress"
+              animated={true}
+              showStatusIndicators={true}
             />
           </View>
 
@@ -225,7 +234,7 @@ export default function DashboardScreen() {
             <Ionicons
               name={showMicronutrients ? "chevron-up" : "chevron-down"}
               size={20}
-              color={colors.theme.teal}
+              color={colors.primary[500]}
             />
           </TouchableOpacity>
 
@@ -339,7 +348,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.theme.cream,
+    backgroundColor: colors.background.primary, // Warm Beige
   },
   container: {
     flex: 1,
@@ -355,7 +364,7 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
-    color: colors.theme.teal,
+    color: colors.primary[500], // Deep Forest Green
   },
   profileButton: {
     padding: 4,
@@ -381,17 +390,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.base,
     paddingHorizontal: spacing.sm,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background.secondary, // Cream Linen
     borderRadius: borderRadius.md,
     marginTop: spacing.base,
   },
   micronutrientToggleText: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.theme.teal,
+    color: colors.primary[500], // Deep Forest Green
   },
   micronutrientPlaceholder: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background.secondary, // Cream Linen
     padding: spacing.lg,
     borderRadius: borderRadius.md,
     marginTop: spacing.sm,
@@ -405,12 +414,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.theme.teal,
+    color: colors.text.secondary, // Bark Brown
     marginBottom: spacing.base,
     textAlign: 'center',
   },
   mealsSection: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background.secondary, // Cream Linen
     padding: spacing.lg,
     marginHorizontal: spacing.lg,
     borderRadius: borderRadius.lg,
@@ -422,45 +431,45 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyText: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 4,
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary, // Bark Brown
+    marginBottom: spacing.xs,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#888',
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary, // Sage Green
   },
   testSection: {
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: colors.background.secondary, // Cream Linen
+    padding: spacing.lg,
     alignItems: 'center',
   },
   mealTypeSection: {
-    marginBottom: 16,
+    marginBottom: spacing.base,
   },
   mealTypeTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-    marginLeft: 4,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.secondary, // Bark Brown
+    marginBottom: spacing.sm,
+    marginLeft: spacing.xs,
   },
   modalCloseContainer: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    backgroundColor: colors.background.secondary, // Cream Linen
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: colors.gray[200],
   },
   modalCloseButton: {
-    backgroundColor: '#4F46E5',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: colors.primary[500], // Deep Forest Green
+    paddingVertical: spacing.base,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
   },
   modalCloseText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.text.inverse, // Cream Linen
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
   },
 });
