@@ -170,21 +170,7 @@ const MealBasketModal: React.FC<MealBasketModalProps> = ({
           </View>
         ) : (
           <View style={styles.contentContainer}>
-            {/* Food Items List - Top Section */}
-            <View style={styles.itemsSection}>
-              <Text style={styles.itemsSectionTitle}>Items in Basket</Text>
-              <View style={styles.itemsListContainer}>
-                <FlatList
-                  data={items}
-                  keyExtractor={(item) => item.food.id}
-                  renderItem={renderCartItem}
-                  style={styles.itemsList}
-                  showsVerticalScrollIndicator={false}
-                />
-              </View>
-            </View>
-
-            {/* Macro Display - Center Section */}
+            {/* Nutrition Summary - Top Section (moved below header) */}
             <View style={styles.macroDisplaySection}>
               <View style={styles.summaryHeader}>
                 <Text style={styles.summaryTitle}>Nutrition Summary</Text>
@@ -222,6 +208,20 @@ const MealBasketModal: React.FC<MealBasketModalProps> = ({
                 showFiber={true}
                 animated={true}
               />
+            </View>
+
+            {/* Food Items List - Second Section (moved below nutrition) */}
+            <View style={styles.itemsSection}>
+              <Text style={styles.itemsSectionTitle}>Items in Basket</Text>
+              <View style={styles.itemsListContainer}>
+                <FlatList
+                  data={items}
+                  keyExtractor={(item) => item.food.id}
+                  renderItem={renderCartItem}
+                  style={styles.itemsList}
+                  showsVerticalScrollIndicator={false}
+                />
+              </View>
             </View>
 
             {/* Footer - Bottom Section */}
@@ -301,10 +301,11 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
   itemsSection: {
-    flex: 0,
+    flex: 1,
     backgroundColor: '#F8FAFC',
     marginHorizontal: 16,
-    marginTop: 8,
+    marginTop: 16,
+    marginBottom: 8,
     borderRadius: 12,
     padding: 16,
   },
@@ -315,13 +316,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   macroDisplaySection: {
-    flex: 1,
+    flex: 0,
     justifyContent: 'center',
-    paddingVertical: 30,
+    paddingVertical: 20,
     paddingHorizontal: 30,
-    paddingBottom: 50, // Extra bottom padding for macro ring labels
+    paddingBottom: 30, // Extra bottom padding for macro ring labels
     overflow: 'visible',
-    minHeight: 250, // Ensure adequate height for macro rings and labels
+    minHeight: 280, // Fixed height for stability
+    marginHorizontal: 16,
+    marginTop: 8,
   },
   summaryHeader: {
     flexDirection: 'row',

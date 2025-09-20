@@ -111,8 +111,11 @@ export default function MacroNutritionDisplay({
       return {
         current: currentTotal + currentValue,
         target: targetValue > 0 ? targetValue : 100, // Fallback to prevent 0 targets
-        centerText: `${Math.round(currentTotal)}+${Math.round(currentValue)}/${targetValue > 0 ? targetValue : 100}`,
-        opacity: 0.8 // Slight opacity for preview mode
+        dayProgressData: {
+          currentTotal: Math.round(currentTotal),
+          additional: Math.round(currentValue),
+          target: targetValue > 0 ? targetValue : 100
+        }
       };
     } else if (variant === 'basket-meal') {
       return {
@@ -137,8 +140,7 @@ export default function MacroNutritionDisplay({
       return {
         current: currentTotal + currentValue,
         target: targetValue,
-        centerText: `${Math.round(currentTotal)}+${Math.round(currentValue)} / ${targetValue}`,
-        opacity: 0.8 // Slight opacity for preview mode
+        centerText: `${Math.round(currentTotal)}+${Math.round(currentValue)} / ${targetValue}`
       };
     } else if (variant === 'progress' && targets) {
       const goalPropertyMap = {
@@ -179,7 +181,7 @@ export default function MacroNutritionDisplay({
     const isAbsoluteValue = variant === 'basket-meal' || variant === 'food-detail';
 
     return (
-      <View style={[styles.calorieSection, { opacity: isProgressPreview || isBasketProgress ? 0.8 : 1 }]}>
+      <View style={styles.calorieSection}>
         <EnhancedCalorieProgressBar
           current={calorieData.current || 0}
           target={calorieData.target || 2000}
@@ -208,10 +210,7 @@ export default function MacroNutritionDisplay({
           return (
             <View
               key={macro}
-              style={[
-                styles.macroRingContainer,
-                { opacity: macroData.opacity || 1 }
-              ]}
+              style={styles.macroRingContainer}
             >
               <EnhancedMacroRing
                 label={macro.charAt(0).toUpperCase() + macro.slice(1)}
@@ -220,9 +219,10 @@ export default function MacroNutritionDisplay({
                 color={macroColors[macro]}
                 variant={isAbsolute ? 'absolute' : 'progress'}
                 size={size}
-                animated={animated && !isProgressPreview && !isBasketProgress}
+                animated={animated && !isProgressPreview}
                 showStatusIndicators={!isAbsolute && !isProgressPreview}
                 customCenterText={macroData.centerText}
+                dayProgressData={macroData.dayProgressData}
               />
             </View>
           );

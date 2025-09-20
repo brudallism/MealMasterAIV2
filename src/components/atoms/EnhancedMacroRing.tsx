@@ -26,6 +26,13 @@ interface EnhancedMacroRingProps {
 
   // Custom center text (for progress-preview mode)
   customCenterText?: string;
+
+  // Day progress data with structured format
+  dayProgressData?: {
+    currentTotal: number;
+    additional: number;
+    target: number;
+  };
 }
 
 export default function EnhancedMacroRing({
@@ -40,7 +47,8 @@ export default function EnhancedMacroRing({
   animationDuration = 800,
   showStatusIndicators = true,
   targetTolerance = 5,
-  customCenterText
+  customCenterText,
+  dayProgressData
 }: EnhancedMacroRingProps) {
   const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -82,7 +90,7 @@ export default function EnhancedMacroRing({
       // For absolute variant or non-animated, set immediately
       animatedValue.setValue(percentage);
     }
-  }, [percentage, animated, animationDuration]);
+  }, [percentage, animated, animationDuration, dayProgressData]);
 
   const renderProgressRing = () => {
     if (variant === 'absolute') {
@@ -120,8 +128,73 @@ export default function EnhancedMacroRing({
           />
         </>
       );
+    } else if (dayProgressData) {
+      // Day progress variant: dual-ring system with animation
+      const currentPercentage = Math.min((dayProgressData.currentTotal / dayProgressData.target) * 100, 100);
+      const totalPercentage = Math.min(((dayProgressData.currentTotal + dayProgressData.additional) / dayProgressData.target) * 100, 100);
+
+      const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+      return (
+        <>
+          {/* Background circle */}
+          <Circle
+            cx={svgSize / 2}
+            cy={svgSize / 2}
+            r={radius}
+            stroke={colors.gray[200]}
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+
+          {/* Current day's progress ring (full opacity) - animated */}
+          <AnimatedCircle
+            cx={svgSize / 2}
+            cy={svgSize / 2}
+            r={radius}
+            stroke={color}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={animated ? animatedValue.interpolate({
+              inputRange: [0, 100],
+              outputRange: [circumference, circumference - (circumference * currentPercentage) / 100],
+              extrapolate: 'clamp',
+            }) : circumference - (circumference * currentPercentage) / 100}
+            transform={`rotate(-90 ${svgSize / 2} ${svgSize / 2})`}
+          />
+
+          {/* Additional meal progress ring (60% opacity) - animated */}
+          <AnimatedCircle
+            cx={svgSize / 2}
+            cy={svgSize / 2}
+            r={radius}
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeOpacity={0.6}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={animated ? animatedValue.interpolate({
+              inputRange: [0, 100],
+              outputRange: [circumference, circumference - (circumference * totalPercentage) / 100],
+              extrapolate: 'clamp',
+            }) : circumference - (circumference * totalPercentage) / 100}
+            transform={`rotate(-90 ${svgSize / 2} ${svgSize / 2})`}
+          />
+
+          {/* Start indicator at 12 o'clock */}
+          <Circle
+            cx={svgSize / 2}
+            cy={svgSize / 2 - radius}
+            r={2}
+            fill={color}
+          />
+        </>
+      );
     } else {
-      // Progress variant: animated progress ring
+      // Standard progress variant: animated progress ring
       const AnimatedCircle = Animated.createAnimatedComponent(Circle);
       return (
         <>
@@ -164,7 +237,23 @@ export default function EnhancedMacroRing({
   };
 
   const renderCenterContent = () => {
-    // Custom center text takes priority
+    // Day progress data takes priority for structured layout
+    if (dayProgressData) {
+      const totalValue = dayProgressData.currentTotal + dayProgressData.additional;
+      return (
+        <>
+          <Text style={[styles.currentValue, sizeConfig.centerText]}>
+            {totalValue}{unit}
+          </Text>
+          <View style={[styles.divider, sizeConfig.divider]} />
+          <Text style={[styles.targetValue, sizeConfig.centerText]}>
+            {dayProgressData.target}{unit}
+          </Text>
+        </>
+      );
+    }
+
+    // Custom center text as fallback
     if (customCenterText) {
       return (
         <Text style={[styles.customCenterText, sizeConfig.centerText]}>
@@ -174,7 +263,7 @@ export default function EnhancedMacroRing({
     }
 
     if (variant === 'absolute') {
-      // Absolute variant: show only current value
+      // Absolute variant: show only current value (used for basket-meal)
       return (
         <Text style={[styles.singleValue, sizeConfig.centerText]}>
           {displayCurrent}{unit}

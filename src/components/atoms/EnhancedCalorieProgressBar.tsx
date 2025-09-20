@@ -59,29 +59,42 @@ export default function EnhancedCalorieProgressBar({
               <View
                 style={[
                   styles.calorieBarFill,
-                  sizeConfig.fill,
                   {
                     width: `${currentPercentage}%`,
                     backgroundColor: progressColor,
+                    borderTopLeftRadius: sizeConfig.fill.borderRadius,
+                    borderBottomLeftRadius: sizeConfig.fill.borderRadius,
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
                   }
                 ]}
-              />
+              >
+                {/* Text for current section - only show when large enough */}
+                {showLabels && currentPercentage > 15 && (
+                  <Text style={[styles.calorieBarTextInsideSection, sizeConfig.text]}>
+                    {dualSection.currentText}
+                  </Text>
+                )}
+              </View>
 
               {/* Additional meal calories (right section with opacity) - flush against left section */}
               <View
                 style={[
                   styles.calorieBarFill,
-                  sizeConfig.fill,
                   {
                     width: `${additionalPercentage}%`,
                     backgroundColor: progressColor,
                     opacity: 0.6,
                     left: `${currentPercentage}%`,
                     position: 'absolute',
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                    borderTopRightRadius: sizeConfig.fill.borderRadius,
+                    borderBottomRightRadius: sizeConfig.fill.borderRadius,
                   }
                 ]}
               >
-                {/* Text inside the additional meal section */}
+                {/* Text inside the additional meal section - only when large enough */}
                 {showLabels && additionalPercentage > 15 && (
                   <Text style={[styles.calorieBarTextInside, sizeConfig.text]}>
                     {dualSection.additionalText}
@@ -89,14 +102,26 @@ export default function EnhancedCalorieProgressBar({
                 )}
               </View>
 
-              {/* Text for current section - inside the left bar */}
-              {showLabels && currentPercentage > 15 && (
-                <Text style={[styles.calorieBarTextInsideLeft, sizeConfig.text]}>
-                  {dualSection.currentText}
+              {/* Text for additional section - when small, positioned to the right of bar */}
+              {showLabels && additionalPercentage <= 15 && additionalPercentage > 0 && (
+                <Text style={[
+                  styles.calorieBarTextRightOfBar,
+                  sizeConfig.text,
+                  { left: `${currentPercentage + additionalPercentage + 2}%` } // 2% padding from bar edge
+                ]}>
+                  {dualSection.additionalText}
                 </Text>
               )}
+
             </View>
           </View>
+
+          {/* Summary text below calorie bar - only show for day progress view */}
+          {dualSection && (
+            <Text style={[styles.calorieBarSummary, sizeConfig.text]}>
+              {Math.round(dualSection.currentValue + dualSection.additionalValue)} / {target} Calories
+            </Text>
+          )}
         </View>
       );
     }
@@ -290,7 +315,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    overflow: 'hidden',
+    overflow: 'visible',
     // Enhanced 3D Floating Effect
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 12 },
@@ -332,20 +357,47 @@ const styles = StyleSheet.create({
     color: colors.text.inverse,
     zIndex: 3,
     position: 'absolute',
-    left: '5%',
+    width: '100%',
     top: '50%',
     transform: [{ translateY: -8 }],
-    textAlign: 'left',
+    textAlign: 'center',
+  },
+  calorieBarTextInsideSection: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.supporting.barkBrown,
+    zIndex: 3,
+    position: 'absolute',
+    width: '100%',
+    top: '50%',
+    transform: [{ translateY: -8 }],
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   calorieBarTextInside: {
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.inverse,
     zIndex: 3,
     position: 'absolute',
-    right: '5%',
+    width: '100%',
     top: '50%',
     transform: [{ translateY: -8 }],
-    textAlign: 'right',
+    textAlign: 'center',
+  },
+  calorieBarTextRightOfBar: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.supporting.barkBrown,
+    zIndex: 4,
+    position: 'absolute',
+    top: '50%',
+    transform: [{ translateY: -8 }],
+    textAlign: 'left',
+  },
+  calorieBarSummary: {
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.supporting.barkBrown,
+    textAlign: 'center',
+    marginTop: spacing.xs,
   },
 
   // Star/Warning bubbles for dashboard
