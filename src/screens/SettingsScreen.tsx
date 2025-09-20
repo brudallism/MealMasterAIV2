@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '../stores/user-store';
+import SentryTestButton from '../components/atoms/SentryTestButton';
 
 type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
 
@@ -362,6 +363,14 @@ const SettingsScreen: React.FC = () => {
             <Text style={styles.resetButtonText}>Reset All Data</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Development Tools */}
+        {__DEV__ && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Development Tools</Text>
+            <SentryTestButton />
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -245,7 +245,8 @@ const styles = StyleSheet.create({
   },
   calorieSection: {
     width: '100%',
-    marginBottom: spacing.base,
+    marginBottom: spacing.base + 4, // Optimized: enough for text + minimal bottom padding
+    position: 'relative', // Allow absolute positioning of children
   },
   macroRings: {
     flexDirection: 'row',

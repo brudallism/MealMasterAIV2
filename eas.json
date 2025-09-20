@@ -17,13 +17,29 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SENTRY_DSN": "https://58f8c3b46b7d68659f85f431e90038f4@o4510018999287808.ingest.us.sentry.io/4510019000926208",
+        "EXPO_PUBLIC_ENVIRONMENT": "preview",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0-preview"
+      },
       "ios": {
         "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
+      "env": {
+        "EXPO_PUBLIC_SENTRY_DSN": "https://58f8c3b46b7d68659f85f431e90038f4@o4510018999287808.ingest.us.sentry.io/4510019000926208",
+        "EXPO_PUBLIC_ENVIRONMENT": "production",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0"
+      },
       "ios": {
         "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     }
   },

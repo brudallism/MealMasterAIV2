@@ -116,7 +116,7 @@ export default function EnhancedCalorieProgressBar({
             </View>
           </View>
 
-          {/* Summary text below calorie bar - only show for day progress view */}
+          {/* Summary text below calorie bar - positioned absolutely to not affect layout */}
           {dualSection && (
             <Text style={[styles.calorieBarSummary, sizeConfig.text]}>
               {Math.round(dualSection.currentValue + dualSection.additionalValue)} / {target} Calories
@@ -394,10 +394,14 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   calorieBarSummary: {
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.supporting.barkBrown,
+    fontWeight: typography.fontWeight.medium, // Match macro label weight
+    color: colors.text.secondary, // Match macro label color
+    fontSize: 13, // Match macro label size (medium)
     textAlign: 'center',
-    marginTop: spacing.xs,
+    position: 'absolute',
+    bottom: -26, // Increased distance from bar for better padding
+    width: '100%',
+    zIndex: 2,
   },
 
   // Star/Warning bubbles for dashboard

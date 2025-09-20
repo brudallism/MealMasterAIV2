@@ -1,5 +1,6 @@
 // src/services/error/error-manager.ts
 // Comprehensive error handling and monitoring system for production
+// Enhanced with Sentry integration for crash reporting and error monitoring
 
 export interface ErrorContext {
   userId?: string;
@@ -42,6 +43,7 @@ export class ErrorManager {
   private errorQueue: DetailedError[] = [];
   private readonly MAX_QUEUE_SIZE = 100;
   private readonly RETRY_DELAYS = [1000, 2000, 5000, 10000]; // Progressive backoff
+  private sentryIntegration?: any; // Will be lazy-loaded to avoid circular dependency
 
   private constructor() {}
 
@@ -86,6 +88,7 @@ export class ErrorManager {
 
     this.logError(detailedError);
     this.queueError(detailedError);
+    this.reportToSentry(detailedError);
 
     return detailedError;
   }
@@ -507,6 +510,27 @@ export class ErrorManager {
   clearOldErrors(maxAge: number = 24 * 60 * 60 * 1000): void {
     const cutoff = Date.now() - maxAge;
     this.errorQueue = this.errorQueue.filter(error => error.timestamp > cutoff);
+  }
+
+  // Report error to Sentry (lazy-loaded to avoid circular dependency)
+  private reportToSentry(detailedError: DetailedError): void {
+    try {
+      if (!this.sentryIntegration) {
+        // Lazy load Sentry integration to avoid circular dependency
+        this.sentryIntegration = require('./sentry-integration').sentryIntegration;
+      }
+
+      // Only report to Sentry if severity is medium or higher
+      if (detailedError.metadata.severity === 'medium' ||
+          detailedError.metadata.severity === 'high' ||
+          detailedError.metadata.severity === 'critical') {
+
+        this.sentryIntegration?.reportError?.(detailedError);
+      }
+    } catch (error) {
+      // Never let Sentry reporting break the error manager
+      console.warn('[ErrorManager] Failed to report to Sentry:', error);
+    }
   }
 }
 
