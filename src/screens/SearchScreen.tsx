@@ -24,6 +24,7 @@ export default function SearchScreen() {
   const [selectedFood, setSelectedFood] = useState<FoodLookupResult | null>(null);
   const [showBasketModal, setShowBasketModal] = useState(false);
   const [wasOpenedFromBarcode, setWasOpenedFromBarcode] = useState(false);
+  const [activeTab, setActiveTab] = useState<'search' | 'recents' | 'favorites'>('search');
   
   const {
     currentQuery,
@@ -39,7 +40,9 @@ export default function SearchScreen() {
     recentFoods,
     starredFoods,
     getRecentFoods,
-    getStarredByCategory
+    getStarredByCategory,
+    toggleStarred,
+    isStarred
   } = useSearchStore();
   
   const { addToCart, itemCount } = useCart();
@@ -323,12 +326,23 @@ export default function SearchScreen() {
       const foods: FoodLookupResult[] = optimizedFoods.map((food: any) => {
         const detailedFood = nutritionMap.get(food.fdcId);
         const nutrients = detailedFood?.foodNutrients || [];
-        
+
         // Create display name with brand for branded foods
         const baseName = food.description || 'Unknown food';
         const brandName = food.brandOwner;
         const displayName = brandName ? `${baseName} - ${brandName}` : baseName;
-        
+
+        // Extract micronutrients from USDA data
+        const micronutrients: { [id: number]: { amount: number; unit: string } } = {};
+        nutrients.forEach((nutrient: any) => {
+          if (nutrient.nutrient?.id && nutrient.amount !== undefined) {
+            micronutrients[nutrient.nutrient.id] = {
+              amount: nutrient.amount,
+              unit: nutrient.nutrient.unitName || 'g'
+            };
+          }
+        });
+
         return {
           id: `usda_${food.fdcId}`,
           name: displayName,
@@ -342,7 +356,8 @@ export default function SearchScreen() {
               fat: extractNutrient(nutrients, 1004) || 0, // Fat
               fiber: extractNutrient(nutrients, 1079) || 0, // Fiber
             },
-            servingSize: '100g'
+            servingSize: '100g',
+            micronutrients: Object.keys(micronutrients).length > 0 ? micronutrients : undefined
           },
           source: {
             api: 'usda' as const,
@@ -394,6 +409,79 @@ export default function SearchScreen() {
     const nutrient = nutrients?.find(n => n.nutrient?.id === nutrientId);
     return nutrient?.amount || 0;
   };
+
+  // Convert MealItem to FoodLookupResult for consistent UI
+  const convertMealItemToFoodLookupResult = (mealItem: any): FoodLookupResult => {
+    return {
+      id: mealItem.id,
+      name: mealItem.name,
+      brand: undefined,
+      category: mealItem.category || 'ingredient',
+      nutrition: {
+        per100g: {
+          calories: mealItem.calories || 0,
+          protein: mealItem.protein || 0,
+          carbs: mealItem.carbs || 0,
+          fat: mealItem.fat || 0,
+          fiber: mealItem.fiber || 0,
+        },
+        servingSize: mealItem.serving_size || '100g'
+      },
+      source: {
+        api: mealItem.source || 'usda' as const,
+        id: mealItem.id,
+        dataType: 'Stored',
+        lastUpdated: new Date().toISOString()
+      },
+      metadata: {
+        confidence: mealItem.confidence || 0.8,
+        warnings: []
+      }
+    };
+  };
+
+  // Get data for current tab
+  const getTabData = (): FoodLookupResult[] => {
+    switch (activeTab) {
+      case 'recents':
+        return getRecentFoods(20).map(recent => convertMealItemToFoodLookupResult(recent.food));
+      case 'favorites':
+        return getStarredByCategory().map(starred => convertMealItemToFoodLookupResult(starred.food));
+      case 'search':
+      default:
+        return [];
+    }
+  };
+
+  // Render tab bar
+  const renderTabBar = () => (
+    <View style={styles.tabBar}>
+      <TouchableOpacity
+        style={[styles.tab, activeTab === 'search' && styles.activeTab]}
+        onPress={() => setActiveTab('search')}
+      >
+        <Text style={[styles.tabText, activeTab === 'search' && styles.activeTabText]}>
+          Search
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.tab, activeTab === 'recents' && styles.activeTab]}
+        onPress={() => setActiveTab('recents')}
+      >
+        <Text style={[styles.tabText, activeTab === 'recents' && styles.activeTabText]}>
+          Recents
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.tab, activeTab === 'favorites' && styles.activeTab]}
+        onPress={() => setActiveTab('favorites')}
+      >
+        <Text style={[styles.tabText, activeTab === 'favorites' && styles.activeTabText]}>
+          Favorites
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   const handleFoodItemClick = (food: FoodLookupResult) => {
     setSelectedFood(food);
@@ -502,36 +590,71 @@ export default function SearchScreen() {
     console.log('✅ Modal state updated - scanner closed, food modal opened');
   };
 
-  const renderFoodItem = ({ item }: { item: FoodLookupResult }) => (
-    <TouchableOpacity 
-      style={styles.foodItem} 
-      onPress={() => handleFoodItemClick(item)}
-    >
-      <View style={styles.foodIconContainer}>
-        <Text style={styles.foodIcon}>{item.metadata?.foodIcon || '🍽️'}</Text>
-      </View>
-      <View style={styles.foodInfo}>
-        <Text style={styles.foodName}>{item.name}</Text>
-        <Text style={styles.foodNutrition}>
-          {Math.round(item.nutrition.per100g.calories || 0)} cal • {Math.round(item.nutrition.per100g.protein || 0)}g protein • {Math.round(item.nutrition.per100g.carbs || 0)}g carbs
-        </Text>
-        <Text style={styles.servingSize}>{item.nutrition.servingSize || '100g'}</Text>
-        <Text style={styles.foodSource}>Source: {item.source.api}</Text>
-        {item.metadata?.warnings && item.metadata.warnings.length > 0 && (
-          <Text style={styles.warningText}>⚠️ {item.metadata.warnings[0]}</Text>
-        )}
-      </View>
-      <TouchableOpacity 
-        style={styles.addButton}
-        onPress={(e) => {
-          e.stopPropagation();
-          handleAddToCart(item);
-        }}
+  const renderFoodItem = ({ item }: { item: FoodLookupResult }) => {
+    const isItemStarred = isStarred(item.id);
+
+    const handleToggleStar = async (e: any) => {
+      e.stopPropagation();
+      // Convert back to MealItem format for the store
+      const mealItem = {
+        id: item.id,
+        name: item.name,
+        calories: item.nutrition.per100g.calories,
+        protein: item.nutrition.per100g.protein,
+        carbs: item.nutrition.per100g.carbs,
+        fat: item.nutrition.per100g.fat,
+        fiber: item.nutrition.per100g.fiber,
+        serving_size: item.nutrition.servingSize,
+        source: item.source.api,
+        category: item.category,
+        confidence: item.metadata.confidence
+      };
+      await toggleStarred(mealItem);
+    };
+
+    return (
+      <TouchableOpacity
+        style={styles.foodItem}
+        onPress={() => handleFoodItemClick(item)}
       >
-        <Ionicons name="add" size={20} color="#4F46E5" />
+        <View style={styles.foodIconContainer}>
+          <Text style={styles.foodIcon}>{item.metadata?.foodIcon || '🍽️'}</Text>
+        </View>
+        <View style={styles.foodInfo}>
+          <Text style={styles.foodName}>{item.name}</Text>
+          <Text style={styles.foodNutrition}>
+            {Math.round(item.nutrition.per100g.calories || 0)} cal • {Math.round(item.nutrition.per100g.protein || 0)}g protein • {Math.round(item.nutrition.per100g.carbs || 0)}g carbs
+          </Text>
+          <Text style={styles.servingSize}>{item.nutrition.servingSize || '100g'}</Text>
+          <Text style={styles.foodSource}>Source: {item.source.api}</Text>
+          {item.metadata?.warnings && item.metadata.warnings.length > 0 && (
+            <Text style={styles.warningText}>⚠️ {item.metadata.warnings[0]}</Text>
+          )}
+        </View>
+        <View style={styles.itemActions}>
+          <TouchableOpacity
+            style={styles.starButton}
+            onPress={handleToggleStar}
+          >
+            <Ionicons
+              name={isItemStarred ? "star" : "star-outline"}
+              size={20}
+              color={isItemStarred ? "#F59E0B" : "#6B7280"}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              handleAddToCart(item);
+            }}
+          >
+            <Ionicons name="add" size={20} color="#4F46E5" />
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   const renderSection = (title: string, data: FoodLookupResult[]) => {
     if (data.length === 0) return null;
@@ -580,13 +703,16 @@ export default function SearchScreen() {
                 value={currentQuery}
                 onChangeText={(text) => {
                   setCurrentQuery(text);
+                  if (text.trim()) {
+                    setActiveTab('search');
+                  }
                   debouncedSearch(text);
                 }}
                 autoFocus
               />
               {currentQuery.length > 0 && (
-                <TouchableOpacity 
-                  style={styles.clearButton} 
+                <TouchableOpacity
+                  style={styles.clearButton}
                   onPress={() => {
                     setCurrentQuery('');
                     setSearchResults(null);
@@ -597,8 +723,8 @@ export default function SearchScreen() {
                 </TouchableOpacity>
               )}
             </View>
-            <TouchableOpacity 
-              style={styles.cartButton} 
+            <TouchableOpacity
+              style={styles.cartButton}
               onPress={() => setShowBasketModal(true)}
             >
               <Ionicons name="basket-outline" size={20} color="#6B7280" />
@@ -609,6 +735,7 @@ export default function SearchScreen() {
               )}
             </TouchableOpacity>
           </View>
+          {renderTabBar()}
         </View>
 
         <FlatList
@@ -616,43 +743,71 @@ export default function SearchScreen() {
           data={[]}
           keyExtractor={() => 'sections'}
           renderItem={() => null}
-          ListHeaderComponent={() => (
-            <View>
-              {isSearching && (
-                <View style={styles.loadingContainer}>
-                  <Text style={styles.loadingText}>Searching...</Text>
+          ListHeaderComponent={() => {
+            // Show search results when actively searching or have results
+            if (activeTab === 'search') {
+              return (
+                <View>
+                  {isSearching && (
+                    <View style={styles.loadingContainer}>
+                      <Text style={styles.loadingText}>Searching...</Text>
+                    </View>
+                  )}
+
+                  {searchError && (
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>Error: {searchError}</Text>
+                    </View>
+                  )}
+
+                  {searchResults && (
+                    <>
+                      {renderSection('Ingredients', searchResults.ingredients)}
+                      {renderSection('Products', searchResults.products)}
+                      {renderSection('Recipes', searchResults.recipes)}
+                    </>
+                  )}
+
+                  {currentQuery === '' && (
+                    <View style={styles.emptyContainer}>
+                      <Text style={styles.emptyText}>Start typing to search for foods</Text>
+                      <Text style={styles.emptySubtext}>Search for ingredients, products, or use the barcode scanner</Text>
+                    </View>
+                  )}
+
+                  {currentQuery !== '' && searchResults && searchResults.total === 0 && !isSearching && (
+                    <View style={styles.emptyContainer}>
+                      <Text style={styles.emptyText}>No results found</Text>
+                      <Text style={styles.emptySubtext}>Try different keywords or scan a barcode</Text>
+                    </View>
+                  )}
                 </View>
-              )}
-              
-              {searchError && (
-                <View style={styles.errorContainer}>
-                  <Text style={styles.errorText}>Error: {searchError}</Text>
-                </View>
-              )}
-              
-              {searchResults && (
-                <>
-                  {renderSection('Ingredients', searchResults.ingredients)}
-                  {renderSection('Products', searchResults.products)}
-                  {renderSection('Recipes', searchResults.recipes)}
-                </>
-              )}
-              
-              {currentQuery === '' && (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>Start typing to search for foods</Text>
-                  <Text style={styles.emptySubtext}>Search for ingredients, products, or use the barcode scanner</Text>
-                </View>
-              )}
-              
-              {currentQuery !== '' && searchResults && searchResults.total === 0 && !isSearching && (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>No results found</Text>
-                  <Text style={styles.emptySubtext}>Try different keywords or scan a barcode</Text>
-                </View>
-              )}
-            </View>
-          )}
+              );
+            }
+
+            // Show recents or favorites
+            const tabData = getTabData();
+            const tabTitle = activeTab === 'recents' ? 'Recent Foods' : 'Favorite Foods';
+            const emptyMessage = activeTab === 'recents'
+              ? 'No recent foods yet'
+              : 'No favorite foods yet';
+            const emptySubMessage = activeTab === 'recents'
+              ? 'Foods you search for and add will appear here'
+              : 'Star foods to add them to your favorites';
+
+            return (
+              <View>
+                {tabData.length > 0 ? (
+                  renderSection(tabTitle, tabData)
+                ) : (
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>{emptyMessage}</Text>
+                    <Text style={styles.emptySubtext}>{emptySubMessage}</Text>
+                  </View>
+                )}
+              </View>
+            );
+          }}
         />
 
         <BarcodeScanner
@@ -668,17 +823,6 @@ export default function SearchScreen() {
           onAddToMeal={handleAddToMeal}
         />
 
-        {/* Debug info - remove in production */}
-        {__DEV__ && (
-          <View style={{ position: 'absolute', top: 100, right: 10, backgroundColor: 'rgba(0,0,0,0.7)', padding: 10, borderRadius: 5 }}>
-            <Text style={{ color: 'white', fontSize: 12 }}>
-              showFoodModal: {showFoodModal.toString()}
-            </Text>
-            <Text style={{ color: 'white', fontSize: 12 }}>
-              selectedFood: {selectedFood?.name || 'null'}
-            </Text>
-          </View>
-        )}
 
         <MealBasketModal
           visible={showBasketModal}
@@ -696,7 +840,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 0,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
@@ -813,12 +958,56 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 2,
   },
+  itemActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  starButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
   addButton: {
     padding: 8,
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#4F46E5',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    marginTop: 12,
+    marginBottom: 0,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  activeTab: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  activeTabText: {
+    color: '#111827',
+    fontWeight: '600',
   },
   loadingContainer: {
     padding: 20,

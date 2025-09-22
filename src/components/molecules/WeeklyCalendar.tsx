@@ -187,7 +187,7 @@ export default function WeeklyCalendar({
           disabled={!canGoPast}
         >
           {canGoPast && (
-            <Ionicons name="chevron-back" size={20} color={colors.theme.teal} />
+            <Ionicons name="chevron-back" size={18} color={colors.theme.teal} />
           )}
         </TouchableOpacity>
 
@@ -249,7 +249,7 @@ export default function WeeklyCalendar({
           disabled={!canGoFuture}
         >
           {canGoFuture && (
-            <Ionicons name="chevron-forward" size={20} color={colors.theme.teal} />
+            <Ionicons name="chevron-forward" size={18} color={colors.theme.teal} />
           )}
         </TouchableOpacity>
       </Animated.View>
@@ -265,12 +265,12 @@ const styles = StyleSheet.create({
   weekContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   navArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: colors.theme.white,
     justifyContent: 'center',
     alignItems: 'center',
@@ -283,9 +283,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.xs,
-    flex: 1,
-    marginHorizontal: spacing.xs, // Move calendar content left slightly
+    paddingHorizontal: spacing.sm,
+    width: width - (spacing.lg * 2) - 56 - (spacing.base * 2), // Screen width minus container padding, arrow widths (28*2), and buffer
   },
   dayContainer: {
     alignItems: 'center',

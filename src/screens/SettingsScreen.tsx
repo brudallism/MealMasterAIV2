@@ -11,7 +11,9 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useUserStore } from '../stores/user-store';
+import { useMicronutrientsStore } from '../stores/micronutrients-store';
 import SentryTestButton from '../components/atoms/SentryTestButton';
 
 type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
@@ -31,7 +33,9 @@ interface UserProfile {
 }
 
 const SettingsScreen: React.FC = () => {
+  const navigation = useNavigation();
   const { user, updateProfile, setGoals } = useUserStore();
+  const { getOrderedDisplayList } = useMicronutrientsStore();
 
   const [profile, setProfile] = useState<UserProfile>({
     name: user?.name || '',
@@ -351,6 +355,46 @@ const SettingsScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Micronutrients Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Micronutrients</Text>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => navigation.navigate('MicronutrientSelection' as never)}
+            >
+              <Ionicons name="create" size={16} color="#4F46E5" />
+              <Text style={styles.editButtonText}>Customize</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.micronutrientsList}>
+            {getOrderedDisplayList().slice(0, 6).map((micronutrient) => (
+              <View key={micronutrient.id} style={styles.micronutrientItem}>
+                <View style={styles.micronutrientInfo}>
+                  <Text style={styles.micronutrientName}>{micronutrient.name}</Text>
+                  <Text style={styles.micronutrientUnit}>({micronutrient.unit})</Text>
+                </View>
+                {micronutrient.minimizeFlag && (
+                  <View style={styles.minimizeIndicator}>
+                    <Ionicons name="arrow-down" size={12} color="#EF4444" />
+                  </View>
+                )}
+              </View>
+            ))}
+            {getOrderedDisplayList().length > 6 && (
+              <Text style={styles.moreIndicator}>
+                +{getOrderedDisplayList().length - 6} more...
+              </Text>
+            )}
+            {getOrderedDisplayList().length === 0 && (
+              <Text style={styles.emptyMicronutrients}>
+                No micronutrients selected. Tap "Customize" to choose which nutrients to track.
+              </Text>
+            )}
+          </View>
+        </View>
+
         {/* Action Buttons */}
         <View style={styles.actionSection}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -551,6 +595,61 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#EF4444',
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  editButtonText: {
+    fontSize: 14,
+    color: '#4F46E5',
+    fontWeight: '500',
+  },
+  micronutrientsList: {
+    gap: 8,
+  },
+  micronutrientItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 6,
+  },
+  micronutrientInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  micronutrientName: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '500',
+  },
+  micronutrientUnit: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  minimizeIndicator: {
+    backgroundColor: '#FEF2F2',
+    padding: 4,
+    borderRadius: 4,
+  },
+  moreIndicator: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 8,
+  },
+  emptyMicronutrients: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    paddingVertical: 16,
+    fontStyle: 'italic',
   },
 });
 

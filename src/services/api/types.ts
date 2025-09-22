@@ -10,6 +10,13 @@ export interface FoodNutrition {
     fiber: number;
   };
   servingSize: string;
+  // Optional micronutrients - may not be available for all foods
+  micronutrients?: {
+    [nutrientId: number]: {
+      amount: number;
+      unit: string;
+    };
+  };
 }
 
 export interface FoodSource {

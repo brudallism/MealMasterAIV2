@@ -1,6 +1,17 @@
 // src/stores/user-store.ts
 import { create } from 'zustand';
 
+// Privacy consent types
+export interface PrivacyConsents {
+  dataCollection: boolean;
+  analytics: boolean;
+  crashReporting: boolean;
+  aiProcessing: boolean;
+  marketing?: boolean;
+  consentDate: number;
+  version: string;
+}
+
 // V0.1 Core User Data Types
 interface UserGoals {
   daily_calorie_goal: number;
@@ -95,6 +106,10 @@ interface UserState {
   completedMilestones: string[];
   userEngagement: number;
   isConnected: boolean;
+
+  // Privacy Consent State
+  privacyConsents: PrivacyConsents | null;
+  needsPrivacyConsent: boolean;
   
   // V0.1 Core Actions
   setUser: (user: User | null) => void;
@@ -132,6 +147,10 @@ interface UserState {
   updateMilestone: (milestone: string) => void;
   incrementUserEngagement: () => void;
   setConnected: (connected: boolean) => void;
+
+  // Privacy Consent Actions
+  setPrivacyConsents: (consents: PrivacyConsents) => void;
+  hasValidConsent: () => boolean;
   
   // V0.3+ Advanced Actions (Future)
   syncHealthData: (source: string, data: any) => void;
@@ -144,11 +163,11 @@ export const useUserStore = create<UserState>((set, get) => ({
   // V0.1 Core State
   user: null,
   goals: {
-    daily_calorie_goal: 2000,
-    protein_goal: 150,
-    carb_goal: 200,
-    fat_goal: 65,
-    fiber_goal: 25
+    daily_calorie_goal: 2400,
+    protein_goal: 180,
+    carb_goal: 180,
+    fat_goal: 85,
+    fiber_goal: 65
   },
   isAuthenticated: false,
   isLoading: false,
@@ -185,6 +204,10 @@ export const useUserStore = create<UserState>((set, get) => ({
   completedMilestones: [],
   userEngagement: 0,
   isConnected: true,
+
+  // Privacy Consent State (Initialize)
+  privacyConsents: null,
+  needsPrivacyConsent: true, // Default to true for new users
   
   // V0.1 Core Actions
   setUser: (user: User | null) => set({ user }),
@@ -366,6 +389,21 @@ export const useUserStore = create<UserState>((set, get) => ({
   })),
   
   setConnected: (connected: boolean) => set({ isConnected: connected }),
+
+  // Privacy Consent Actions Implementation
+  setPrivacyConsents: (consents: PrivacyConsents) => set({
+    privacyConsents: consents,
+    needsPrivacyConsent: false
+  }),
+
+  hasValidConsent: () => {
+    const state = get();
+    if (!state.privacyConsents) return false;
+
+    // Check if consent is still valid (12 months)
+    const twelveMonthsAgo = Date.now() - (12 * 30 * 24 * 60 * 60 * 1000);
+    return state.privacyConsents.consentDate > twelveMonthsAgo;
+  },
   
   // V0.3+ Advanced Actions (Future Stubs)
   syncHealthData: async (source: string, data: any) => {
@@ -397,11 +435,11 @@ export const useUserStore = create<UserState>((set, get) => ({
       achievements: [],
       preferences: {},
       goals: {
-        daily_calorie_goal: 2000,
-        protein_goal: 150,
-        carb_goal: 200,
-        fat_goal: 65,
-        fiber_goal: 25
+        daily_calorie_goal: 2400,
+        protein_goal: 180,
+        carb_goal: 180,
+        fat_goal: 85,
+        fiber_goal: 65
       }
     });
   }

@@ -1,5 +1,6 @@
 // src/stores/meal-store.ts
 import { create } from 'zustand';
+import { generateMockMealData, ENABLE_MOCK_DATA } from '../data/mock-data';
 
 // V0.1 Core Meal Data Types
 export interface Meal {
@@ -13,7 +14,8 @@ export interface Meal {
   fiber?: number; // Optional fiber field
   quantity_grams: number;
   logged_at: string;
-  
+  micronutrients?: Record<number, number>; // USDA nutrient ID -> amount
+
   // V0.2+ AI Integration Fields (Expansion Hooks)
   ai_confidence?: number;
   user_confirmed?: boolean;
@@ -28,6 +30,7 @@ export interface DailyTotals {
   carbs: number;
   fat: number;
   fiber: number;
+  micronutrients: Record<number, number>; // USDA nutrient ID -> total amount
 }
 
 // V0.2+ Workflow Integration Types (Future)
@@ -64,6 +67,7 @@ interface MealState {
   calculateTotals: () => void;
   setLoading: (loading: boolean) => void;
   setSelectedDate: (date: string) => void;
+  initializeMockData: () => void;
   
   // V0.2+ AI Workflow Actions (Future Implementation Hooks)
   startFoodRecognitionWorkflow: (userInput: string) => string; // Returns workflow ID
@@ -100,7 +104,7 @@ export const useMealStore = create<MealState>((set, get) => ({
   // V0.1 Core State
   allMeals: [],
   todaysMeals: [],
-  dailyTotals: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  dailyTotals: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, micronutrients: {} },
   isLoading: false,
   selectedDate: getLocalDateString(),
   
@@ -280,19 +284,46 @@ export const useMealStore = create<MealState>((set, get) => ({
       dailyTotals: newTotals
     });
   },
+
+  initializeMockData: () => {
+    if (ENABLE_MOCK_DATA) {
+      const mockMeals = generateMockMealData();
+      const state = get();
+      const selectedDateMeals = filterMealsByDate(mockMeals, state.selectedDate);
+      const newTotals = calculateDailyTotals(selectedDateMeals);
+      set({
+        allMeals: mockMeals,
+        todaysMeals: selectedDateMeals,
+        dailyTotals: newTotals
+      });
+      console.log('Mock meal data initialized with', mockMeals.length, 'meals');
+    }
+  },
 }));
 
 // Helper function for calculating daily totals
 function calculateDailyTotals(meals: Meal[]): DailyTotals {
   return meals.reduce(
-    (totals, meal) => ({
-      calories: totals.calories + meal.calories,
-      protein: totals.protein + meal.protein,
-      carbs: totals.carbs + meal.carbs,
-      fat: totals.fat + meal.fat,
-      fiber: totals.fiber + (meal.fiber || 0) // Handle missing fiber field gracefully
-    }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
+    (totals, meal) => {
+      // Sum micronutrients
+      const mealMicronutrients = meal.micronutrients || {};
+      const updatedMicronutrients = { ...totals.micronutrients };
+
+      Object.entries(mealMicronutrients).forEach(([nutrientId, amount]) => {
+        const id = parseInt(nutrientId);
+        updatedMicronutrients[id] = (updatedMicronutrients[id] || 0) + amount;
+      });
+
+      return {
+        calories: totals.calories + meal.calories,
+        protein: totals.protein + meal.protein,
+        carbs: totals.carbs + meal.carbs,
+        fat: totals.fat + meal.fat,
+        fiber: totals.fiber + (meal.fiber || 0),
+        micronutrients: updatedMicronutrients
+      };
+    },
+    { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, micronutrients: {} }
   );
 }
 
