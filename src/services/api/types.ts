@@ -128,3 +128,13 @@ export interface StarredFood {
   category: string;
   starredAt: string;
 }
+
+// Extended for recipes - unified favorites interface
+export interface FavoriteItem {
+  id: string;
+  type: 'food' | 'recipe';
+  item: MealItem | import('../types/recipe').Recipe;
+  category: string;
+  starredAt: string;
+  notes?: string;
+}

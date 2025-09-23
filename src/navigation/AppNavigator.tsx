@@ -11,6 +11,8 @@ import PlansScreen from '@/screens/PlansScreen';
 import SearchScreen from '@/screens/SearchScreen';
 import SettingsScreen from '@/screens/SettingsScreen';
 import MicronutrientSelectionScreen from '@/screens/MicronutrientSelectionScreen';
+import { DietAllergiesScreen } from '@/screens/DietAllergiesScreen';
+import RecipeDetailScreen from '@/screens/RecipeDetailScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -99,6 +101,22 @@ export default function AppNavigator() {
           component={MicronutrientSelectionScreen}
           options={{
             headerShown: false, // MicronutrientSelectionScreen has its own header
+          }}
+        />
+
+        <Stack.Screen
+          name="DietAllergies"
+          component={DietAllergiesScreen}
+          options={{
+            headerShown: false, // DietAllergiesScreen has its own header
+          }}
+        />
+
+        <Stack.Screen
+          name="RecipeDetail"
+          component={RecipeDetailScreen}
+          options={{
+            headerShown: false, // RecipeDetailScreen has its own header
           }}
         />
       </Stack.Navigator>

@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useUserStore } from '../stores/user-store';
 import { useMicronutrientsStore } from '../stores/micronutrients-store';
 import SentryTestButton from '../components/atoms/SentryTestButton';
+import CompactProfileInputs from '../components/molecules/CompactProfileInputs';
 
 type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
 
@@ -50,6 +51,8 @@ const SettingsScreen: React.FC = () => {
       fat: '',
     },
   });
+
+  const [isMetric, setIsMetric] = useState(true);
 
   const [isManualMacros, setIsManualMacros] = useState(false);
 
@@ -193,42 +196,34 @@ const SettingsScreen: React.FC = () => {
             />
           </View>
 
-          <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={styles.inputLabel}>Age</Text>
-              <TextInput
-                style={styles.textInput}
-                value={profile.age}
-                onChangeText={(text) => setProfile(prev => ({ ...prev, age: text }))}
-                placeholder="25"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
-              />
-            </View>
-            <View style={[styles.inputGroup, { flex: 1, marginLeft: 12 }]}>
-              <Text style={styles.inputLabel}>Weight (kg)</Text>
-              <TextInput
-                style={styles.textInput}
-                value={profile.weight}
-                onChangeText={(text) => setProfile(prev => ({ ...prev, weight: text }))}
-                placeholder="70"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
-              />
+          <View style={styles.inputGroup}>
+            <View style={styles.unitsToggleContainer}>
+              <Text style={styles.unitsToggleLabel}>Units</Text>
+              <TouchableOpacity
+                style={styles.unitsToggle}
+                onPress={() => setIsMetric(!isMetric)}
+              >
+                <Text style={[styles.unitsToggleText, !isMetric && styles.unitsToggleTextActive]}>
+                  Imperial
+                </Text>
+                <Text style={[styles.unitsToggleText, isMetric && styles.unitsToggleTextActive]}>
+                  Metric
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Height (cm)</Text>
-            <TextInput
-              style={styles.textInput}
-              value={profile.height}
-              onChangeText={(text) => setProfile(prev => ({ ...prev, height: text }))}
-              placeholder="175"
-              placeholderTextColor="#9CA3AF"
-              keyboardType="numeric"
-            />
-          </View>
+          <CompactProfileInputs
+            profileData={{
+              age: profile.age,
+              weight: profile.weight,
+              height: profile.height,
+            }}
+            isMetric={isMetric}
+            onProfileChange={(field, value) => {
+              setProfile(prev => ({ ...prev, [field]: value }));
+            }}
+          />
         </View>
 
         {/* Activity Level */}
@@ -352,6 +347,33 @@ const SettingsScreen: React.FC = () => {
                 editable={isManualMacros}
               />
             </View>
+          </View>
+        </View>
+
+        {/* Diet & Allergies Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Diet & Allergies</Text>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => navigation.navigate('DietAllergies' as never)}
+            >
+              <Ionicons name="restaurant" size={16} color="#4F46E5" />
+              <Text style={styles.editButtonText}>Configure</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.dietSummaryContainer}>
+            <Text style={styles.dietSummaryText}>
+              Set your dietary preferences, allergies, and food exclusions to get personalized recipe recommendations.
+            </Text>
+            <TouchableOpacity
+              style={styles.dietConfigureButton}
+              onPress={() => navigation.navigate('DietAllergies' as never)}
+            >
+              <Ionicons name="settings" size={20} color="#FFFFFF" />
+              <Text style={styles.dietConfigureButtonText}>Configure Preferences</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -650,6 +672,63 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 16,
     fontStyle: 'italic',
+  },
+  dietSummaryContainer: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: 8,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
+  dietSummaryText: {
+    fontSize: 14,
+    color: '#0C4A6E',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  dietConfigureButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0EA5E9',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  dietConfigureButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  unitsToggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  unitsToggleLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  unitsToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 2,
+  },
+  unitsToggleText: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+    borderRadius: 6,
+  },
+  unitsToggleTextActive: {
+    backgroundColor: '#4F46E5',
+    color: '#FFFFFF',
   },
 });
 

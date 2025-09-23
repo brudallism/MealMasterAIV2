@@ -1,5 +1,7 @@
 // src/stores/user-store.ts
 import { create } from 'zustand';
+import { DietaryPreferences, DietType, Intolerance } from '@/types/dietary';
+import { DIET_EXCLUDES, GLUTEN_FREE_EXCLUDES, FODMAP_STRICT_EXCLUDES } from '@/services/preferences/presets';
 
 // Privacy consent types
 export interface PrivacyConsents {
@@ -110,6 +112,9 @@ interface UserState {
   // Privacy Consent State
   privacyConsents: PrivacyConsents | null;
   needsPrivacyConsent: boolean;
+
+  // Dietary Preferences State
+  dietaryPreferences: DietaryPreferences;
   
   // V0.1 Core Actions
   setUser: (user: User | null) => void;
@@ -151,6 +156,18 @@ interface UserState {
   // Privacy Consent Actions
   setPrivacyConsents: (consents: PrivacyConsents) => void;
   hasValidConsent: () => boolean;
+
+  // Dietary Preferences Actions
+  setDiet: (diet: DietType) => void;
+  toggleAllergy: (intolerance: Intolerance) => void;
+  addExclude: (ingredient: string) => void;
+  removeExclude: (ingredient: string) => void;
+  toggleExclude: (ingredient: string) => void;
+  setGlutenFree: (enabled: boolean) => void;
+  setLowFodmapStrict: (enabled: boolean) => void;
+  setCuisines: (include: string[], exclude: string[]) => void;
+  updateCuisines: (include: string[], exclude: string[]) => void;
+  resetDietaryPreferences: () => void;
   
   // V0.3+ Advanced Actions (Future)
   syncHealthData: (source: string, data: any) => void;
@@ -208,6 +225,19 @@ export const useUserStore = create<UserState>((set, get) => ({
   // Privacy Consent State (Initialize)
   privacyConsents: null,
   needsPrivacyConsent: true, // Default to true for new users
+
+  // Dietary Preferences State (Initialize with defaults)
+  dietaryPreferences: {
+    version: 1,
+    diet: "none",
+    allergies: [],
+    excludeIngredients: [],
+    includeIngredients: [],
+    cuisines: { include: [], exclude: [] },
+    presets: { glutenFree: false, lowFodmapStrict: false },
+    dietImpliedExclusions: [],
+    updatedAt: new Date().toISOString(),
+  },
   
   // V0.1 Core Actions
   setUser: (user: User | null) => set({ user }),
@@ -404,7 +434,177 @@ export const useUserStore = create<UserState>((set, get) => ({
     const twelveMonthsAgo = Date.now() - (12 * 30 * 24 * 60 * 60 * 1000);
     return state.privacyConsents.consentDate > twelveMonthsAgo;
   },
-  
+
+  // Dietary Preferences Actions Implementation
+  setDiet: (diet: DietType) => {
+    set((state) => {
+      const dietImpliedExclusions = [...DIET_EXCLUDES[diet]];
+      return {
+        dietaryPreferences: {
+          ...state.dietaryPreferences,
+          diet,
+          dietImpliedExclusions,
+          updatedAt: new Date().toISOString(),
+        }
+      };
+    });
+  },
+
+  toggleAllergy: (intolerance: Intolerance) => {
+    set((state) => {
+      const allergies = state.dietaryPreferences.allergies.includes(intolerance)
+        ? state.dietaryPreferences.allergies.filter(a => a !== intolerance)
+        : [...state.dietaryPreferences.allergies, intolerance];
+
+      return {
+        dietaryPreferences: {
+          ...state.dietaryPreferences,
+          allergies,
+          updatedAt: new Date().toISOString(),
+        }
+      };
+    });
+  },
+
+  addExclude: (ingredient: string) => {
+    set((state) => {
+      const normalized = ingredient.trim().toLowerCase();
+      if (state.dietaryPreferences.excludeIngredients.includes(normalized)) {
+        return state;
+      }
+
+      return {
+        dietaryPreferences: {
+          ...state.dietaryPreferences,
+          excludeIngredients: [...state.dietaryPreferences.excludeIngredients, normalized],
+          updatedAt: new Date().toISOString(),
+        }
+      };
+    });
+  },
+
+  removeExclude: (ingredient: string) => {
+    set((state) => {
+      const normalized = ingredient.trim().toLowerCase();
+      return {
+        dietaryPreferences: {
+          ...state.dietaryPreferences,
+          excludeIngredients: state.dietaryPreferences.excludeIngredients.filter(ex => ex !== normalized),
+          updatedAt: new Date().toISOString(),
+        }
+      };
+    });
+  },
+
+  toggleExclude: (ingredient: string) => {
+    const state = get();
+    const normalized = ingredient.trim().toLowerCase();
+    const isExcluded = state.dietaryPreferences.excludeIngredients.includes(normalized);
+
+    if (isExcluded) {
+      state.removeExclude(ingredient);
+    } else {
+      state.addExclude(ingredient);
+    }
+  },
+
+  setGlutenFree: (enabled: boolean) => {
+    set((state) => {
+      let excludeIngredients = [...state.dietaryPreferences.excludeIngredients];
+
+      if (enabled) {
+        // Add gluten-free excludes
+        GLUTEN_FREE_EXCLUDES.forEach(exclude => {
+          if (!excludeIngredients.includes(exclude)) {
+            excludeIngredients.push(exclude);
+          }
+        });
+      } else {
+        // Remove gluten-free excludes
+        excludeIngredients = excludeIngredients.filter(ex => !GLUTEN_FREE_EXCLUDES.includes(ex));
+      }
+
+      return {
+        dietaryPreferences: {
+          ...state.dietaryPreferences,
+          presets: {
+            ...state.dietaryPreferences.presets,
+            glutenFree: enabled,
+          },
+          excludeIngredients,
+          updatedAt: new Date().toISOString(),
+        }
+      };
+    });
+  },
+
+  setLowFodmapStrict: (enabled: boolean) => {
+    set((state) => {
+      let excludeIngredients = [...state.dietaryPreferences.excludeIngredients];
+
+      if (enabled) {
+        // Add FODMAP strict excludes
+        FODMAP_STRICT_EXCLUDES.forEach(exclude => {
+          if (!excludeIngredients.includes(exclude)) {
+            excludeIngredients.push(exclude);
+          }
+        });
+      } else {
+        // Remove FODMAP strict excludes
+        excludeIngredients = excludeIngredients.filter(ex => !FODMAP_STRICT_EXCLUDES.includes(ex));
+      }
+
+      return {
+        dietaryPreferences: {
+          ...state.dietaryPreferences,
+          presets: {
+            ...state.dietaryPreferences.presets,
+            lowFodmapStrict: enabled,
+          },
+          excludeIngredients,
+          updatedAt: new Date().toISOString(),
+        }
+      };
+    });
+  },
+
+
+  setCuisines: (include: string[], exclude: string[]) => {
+    set((state) => ({
+      dietaryPreferences: {
+        ...state.dietaryPreferences,
+        cuisines: { include, exclude },
+        updatedAt: new Date().toISOString(),
+      }
+    }));
+  },
+
+  updateCuisines: (include: string[], exclude: string[]) => {
+    set((state) => ({
+      dietaryPreferences: {
+        ...state.dietaryPreferences,
+        cuisines: { include, exclude },
+        updatedAt: new Date().toISOString(),
+      }
+    }));
+  },
+
+  resetDietaryPreferences: () => {
+    set((state) => ({
+      dietaryPreferences: {
+        version: 1,
+        diet: "none",
+        allergies: [],
+        excludeIngredients: [],
+        includeIngredients: [],
+        cuisines: { include: [], exclude: [] },
+        presets: { glutenFree: false, lowFodmapStrict: false },
+        dietImpliedExclusions: [],
+        updatedAt: new Date().toISOString(),
+      }
+    }));
+  },
+
   // V0.3+ Advanced Actions (Future Stubs)
   syncHealthData: async (source: string, data: any) => {
     // Future: Integrate with health APIs

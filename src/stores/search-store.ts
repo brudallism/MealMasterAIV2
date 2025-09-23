@@ -1,7 +1,8 @@
 // src/stores/search-store.ts
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SearchResults, SearchHistoryItem, RecentFood, StarredFood, MealItem } from '../services/api/types';
+import { SearchResults, SearchHistoryItem, RecentFood, StarredFood, MealItem, FavoriteItem } from '../services/api/types';
+import { Recipe } from '../types/recipe';
 
 interface SearchState {
   // Current search state
@@ -19,6 +20,9 @@ interface SearchState {
   // Starred/favorited foods
   starredFoods: StarredFood[];
 
+  // Unified favorites (foods + recipes)
+  favorites: FavoriteItem[];
+
   // Actions
   setCurrentQuery: (query: string) => void;
   setSearchResults: (results: SearchResults | null) => void;
@@ -35,11 +39,19 @@ interface SearchState {
   getRecentFoods: (limit?: number) => RecentFood[];
   clearRecentFoods: () => Promise<void>;
 
-  // Starred foods actions
+  // Starred foods actions (legacy - maintained for compatibility)
   toggleStarred: (food: MealItem, category?: string) => Promise<void>;
   isStarred: (foodId: string) => boolean;
   getStarredByCategory: (category?: string) => StarredFood[];
   clearStarredFoods: () => Promise<void>;
+
+  // Unified favorites actions (foods + recipes)
+  addToFavorites: (item: MealItem | Recipe, type: 'food' | 'recipe', category?: string, notes?: string) => Promise<void>;
+  removeFromFavorites: (id: string) => Promise<void>;
+  isFavorite: (id: string) => boolean;
+  getFavoritesByType: (type?: 'food' | 'recipe') => FavoriteItem[];
+  getFavoritesByCategory: (category?: string) => FavoriteItem[];
+  clearFavorites: () => Promise<void>;
 
   // Initialization
   loadFromStorage: () => Promise<void>;
@@ -49,6 +61,7 @@ const STORAGE_KEYS = {
   SEARCH_HISTORY: '@mealmaster_search_history',
   RECENT_FOODS: '@mealmaster_recent_foods',
   STARRED_FOODS: '@mealmaster_starred_foods',
+  FAVORITES: '@mealmaster_favorites',
 };
 
 export const useSearchStore = create<SearchState>((set, get) => ({
@@ -60,6 +73,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   searchHistory: [],
   recentFoods: [],
   starredFoods: [],
+  favorites: [],
 
   // Basic state setters
   setCurrentQuery: (query: string) => set({ currentQuery: query }),
@@ -203,13 +217,79 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     }
   },
 
+  // Unified favorites management (foods + recipes)
+  addToFavorites: async (item: MealItem | Recipe, type: 'food' | 'recipe', category = 'favorite', notes?: string) => {
+    const state = get();
+    const itemId = type === 'food' ? (item as MealItem).id : String((item as Recipe).id);
+
+    // Remove existing entry if it exists
+    const filteredFavorites = state.favorites.filter(fav => fav.id !== itemId);
+
+    // Add new favorite
+    const newFavorite: FavoriteItem = {
+      id: itemId,
+      type,
+      item,
+      category,
+      starredAt: new Date().toISOString(),
+      notes,
+    };
+
+    const newFavorites = [newFavorite, ...filteredFavorites];
+    set({ favorites: newFavorites });
+
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(newFavorites));
+    } catch (error) {
+      console.error('Failed to save favorites:', error);
+    }
+  },
+
+  removeFromFavorites: async (id: string) => {
+    const state = get();
+    const newFavorites = state.favorites.filter(fav => fav.id !== id);
+    set({ favorites: newFavorites });
+
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(newFavorites));
+    } catch (error) {
+      console.error('Failed to save favorites:', error);
+    }
+  },
+
+  isFavorite: (id: string) => {
+    return get().favorites.some(fav => fav.id === id);
+  },
+
+  getFavoritesByType: (type?: 'food' | 'recipe') => {
+    const favorites = get().favorites;
+    if (!type) return favorites;
+    return favorites.filter(fav => fav.type === type);
+  },
+
+  getFavoritesByCategory: (category?: string) => {
+    const favorites = get().favorites;
+    if (!category) return favorites;
+    return favorites.filter(fav => fav.category === category);
+  },
+
+  clearFavorites: async () => {
+    set({ favorites: [] });
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEYS.FAVORITES);
+    } catch (error) {
+      console.error('Failed to clear favorites:', error);
+    }
+  },
+
   // Load data from AsyncStorage on app start
   loadFromStorage: async () => {
     try {
-      const [searchHistoryJson, recentFoodsJson, starredFoodsJson] = await Promise.all([
+      const [searchHistoryJson, recentFoodsJson, starredFoodsJson, favoritesJson] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.SEARCH_HISTORY),
         AsyncStorage.getItem(STORAGE_KEYS.RECENT_FOODS),
         AsyncStorage.getItem(STORAGE_KEYS.STARRED_FOODS),
+        AsyncStorage.getItem(STORAGE_KEYS.FAVORITES),
       ]);
 
       const updates: Partial<SearchState> = {};
@@ -238,6 +318,15 @@ export const useSearchStore = create<SearchState>((set, get) => ({
         } catch (error) {
           console.error('Failed to parse starred foods:', error);
           updates.starredFoods = [];
+        }
+      }
+
+      if (favoritesJson) {
+        try {
+          updates.favorites = JSON.parse(favoritesJson);
+        } catch (error) {
+          console.error('Failed to parse favorites:', error);
+          updates.favorites = [];
         }
       }
 
