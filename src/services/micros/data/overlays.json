@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "description": "Goal-based and modifier-based micronutrient overlays",
+    "last_updated": "2025-09-24"
+  },
+  "primary_goal": {
+    "weight_loss": [
+      {
+        "id": 291,
+        "action": "highlight",
+        "reason": "Satiety & glycemic control via fiber"
+      }
+    ],
+    "maintenance": [],
+    "muscle_gain": [
+      {
+        "group": "B_complex",
+        "nutrients": [1178, 1177],
+        "action": "highlight",
+        "reason": "Energy metabolism support"
+      }
+    ],
+    "body_recomposition": []
+  },
+  "modifiers": {
+    "blood_sugar": [
+      {
+        "id": 1235,
+        "set_limit_formula": "floor((kcal_target * 0.10) / 4)",
+        "reason": "Added sugars ≤10% kcal"
+      },
+      {
+        "id": 291,
+        "enforce_min": true,
+        "reason": "Maintain high fiber minimum"
+      },
+      {
+        "ux_hint": "even_carb_distribution_across_meals"
+      }
+    ],
+    "hormonal_support": [
+      {
+        "life_stage_targets": true,
+        "reason": "Use demographic-appropriate RDAs without modifications"
+      },
+      {
+        "macro_dependency": "ensure fat ≥ 0.25–0.30 kcal (handled in macro engine)"
+      }
+    ],
+    "digestive_support": [
+      {
+        "id": 291,
+        "action": "highlight",
+        "reason": "Titrate via coaching; no range needed"
+      }
+    ]
+  },
+  "overlay_rules": {
+    "merge_priority": "When multiple overlays adjust same nutrient: take higher minimum, lower maximum/limit; record both rationales",
+    "ul_enforcement": "Always clamp computed targets to UL if exceeded",
+    "energy_scaling": "Fiber and added sugars depend on kcal_target from macro engine"
+  }
+}

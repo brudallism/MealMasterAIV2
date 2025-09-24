@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RDA/AI/UL Micronutrient Table Schema",
+  "description": "Schema for DRI-based micronutrient recommendations by sex and life stage",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "description": "Data version for change tracking" },
+        "source": { "type": "string", "description": "Data provenance (e.g., US DRI 2019-2020)" },
+        "last_updated": { "type": "string", "format": "date" },
+        "regions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Supported regions/countries"
+        }
+      },
+      "required": ["version", "source", "last_updated"]
+    },
+    "life_stages": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Available life stage categories",
+      "examples": [["19-30", "31-50", "51-70", "71+"]]
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sex": {
+            "type": "string",
+            "enum": ["male", "female", "other"],
+            "description": "Biological sex category"
+          },
+          "life_stage": {
+            "type": "string",
+            "description": "Age range category"
+          },
+          "values": {
+            "type": "object",
+            "patternProperties": {
+              "^[0-9]+$": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "Nutrient name" },
+                  "unit": {
+                    "type": "string",
+                    "enum": ["g", "mg", "µg", "kcal", "IU"],
+                    "description": "Measurement unit"
+                  },
+                  "target": {
+                    "type": ["number", "null"],
+                    "description": "RDA or AI value (recommended daily amount)"
+                  },
+                  "ul": {
+                    "type": ["number", "null"],
+                    "description": "Upper limit (safety threshold)"
+                  },
+                  "limit": {
+                    "type": ["number", "null"],
+                    "description": "Restriction limit (e.g., sodium daily limit)"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "description": "Special considerations"
+                  }
+                },
+                "required": ["name", "unit"],
+                "additionalProperties": false
+              }
+            },
+            "description": "Nutrient values indexed by USDA FDC nutrient ID"
+          }
+        },
+        "required": ["sex", "life_stage", "values"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["meta", "life_stages", "data"],
+  "additionalProperties": false
+}

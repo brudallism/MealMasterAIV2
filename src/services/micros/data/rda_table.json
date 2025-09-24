@@ -1,0 +1,3766 @@
+{
+  "meta": {
+    "version": "2.0.0",
+    "description": "Comprehensive RDA/AI/UL table for all tracked nutrients across life stages",
+    "source": "US DRI 2019-2020 (IOM/NASEM), NIH ODS Fact Sheets, Dietary Guidelines for Americans 2020-2025",
+    "last_updated": "2025-09-24",
+    "regions": [
+      "US",
+      "CA"
+    ],
+    "citations": {
+      "primary": "Institute of Medicine. Dietary Reference Intakes for Energy, Carbohydrate, Fiber, Fat, Fatty Acids, Cholesterol, Protein, and Amino Acids. Washington, DC: The National Academies Press, 2005.",
+      "vitamins": "Institute of Medicine. Dietary Reference Intakes for Thiamin, Riboflavin, Niacin, Vitamin B6, Folate, Vitamin B12, Pantothenic Acid, Biotin, and Choline. Washington, DC: The National Academies Press, 1998.",
+      "minerals": "Institute of Medicine. Dietary Reference Intakes for Calcium, Phosphorus, Magnesium, Vitamin D, and Fluoride. Washington, DC: The National Academies Press, 1997.",
+      "trace_elements": "Institute of Medicine. Dietary Reference Intakes for Vitamin A, Vitamin K, Arsenic, Boron, Chromium, Copper, Iodine, Iron, Manganese, Molybdenum, Nickel, Silicon, Vanadium, and Zinc. Washington, DC: The National Academies Press, 2001.",
+      "dietary_guidelines": "U.S. Department of Health and Human Services and U.S. Department of Agriculture. 2020\u20132025 Dietary Guidelines for Americans. 9th Edition. December 2020."
+    },
+    "notes": [
+      "Values rounded to whole units as per policy",
+      "UL values enforced as safety limits where established",
+      "Energy-scaled nutrients (fiber, added sugars) calculated dynamically",
+      "Sex-neutral 'other' uses averaged values where male/female differ",
+      "Macros (calories, protein, fat, carbs) calculated by macro engine"
+    ]
+  },
+  "life_stages": [
+    "19-30",
+    "31-50",
+    "51-70",
+    "71+"
+  ],
+  "data": [
+    {
+      "sex": "male",
+      "life_stage": "19-30",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value",
+          "target": 3400
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1000,
+          "ul": 2500
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only)",
+          "target": 400
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 8
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex",
+          "target": 11
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 35
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only",
+          "target": 900
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex",
+          "target": 90
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 120
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form",
+          "target": 16
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 1
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex",
+          "target": 550
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA)",
+          "target": 2
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid)",
+          "target": 17
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "male",
+      "life_stage": "31-50",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value",
+          "target": 3400
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1000,
+          "ul": 2500
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only)",
+          "target": 420
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 8
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex",
+          "target": 11
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 35
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only",
+          "target": 900
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex",
+          "target": 90
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 120
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form",
+          "target": 16
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 1
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex",
+          "target": 550
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA)",
+          "target": 2
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid)",
+          "target": 17
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "male",
+      "life_stage": "51-70",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value",
+          "target": 3400
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1000,
+          "ul": 2000
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only)",
+          "target": 420
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 8
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex",
+          "target": 11
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 30
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only",
+          "target": 900
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex",
+          "target": 90
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 120
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form",
+          "target": 16
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 2
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex",
+          "target": 550
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA)",
+          "target": 2
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid)",
+          "target": 14
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "male",
+      "life_stage": "71+",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value",
+          "target": 3400
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1200,
+          "ul": 2000
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only)",
+          "target": 420
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 8
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex",
+          "target": 11
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 30
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only",
+          "target": 900
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex",
+          "target": 90
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 20
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 120
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form",
+          "target": 16
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 2
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex",
+          "target": 550
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA)",
+          "target": 2
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid)",
+          "target": 14
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "female",
+      "life_stage": "19-30",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value",
+          "target": 2600
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1000,
+          "ul": 2500
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only)",
+          "target": 310
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 18
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex",
+          "target": 8
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 25
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only",
+          "target": 700
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex",
+          "target": 75
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 90
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form",
+          "target": 14
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 1
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex",
+          "target": 425
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA)",
+          "target": 1
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid)",
+          "target": 12
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "female",
+      "life_stage": "31-50",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value",
+          "target": 2600
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1000,
+          "ul": 2500
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only)",
+          "target": 320
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 18
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex",
+          "target": 8
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 25
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only",
+          "target": 700
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex",
+          "target": 75
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 90
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form",
+          "target": 14
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 1
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex",
+          "target": 425
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA)",
+          "target": 1
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid)",
+          "target": 12
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "female",
+      "life_stage": "51-70",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value",
+          "target": 2600
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1200,
+          "ul": 2000
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only)",
+          "target": 320
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 8
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex",
+          "target": 8
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 20
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only",
+          "target": 700
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex",
+          "target": 75
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 90
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form",
+          "target": 14
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 2
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex",
+          "target": 425
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA)",
+          "target": 1
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid)",
+          "target": 11
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "female",
+      "life_stage": "71+",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value",
+          "target": 2600
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1200,
+          "ul": 2000
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only)",
+          "target": 320
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 8
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex",
+          "target": 8
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 20
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only",
+          "target": 700
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex",
+          "target": 75
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 20
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex",
+          "target": 90
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form",
+          "target": 14
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 2
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex",
+          "target": 425
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA)",
+          "target": 1
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid)",
+          "target": 11
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "other",
+      "life_stage": "19-30",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value (averaged from male/female values)",
+          "target": 3000.0
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1000,
+          "ul": 2500
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only) (averaged from male/female values)",
+          "target": 355.0
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex (averaged from male/female values)",
+          "target": 13.0
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex (averaged from male/female values)",
+          "target": 9.5
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 30.0
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only (averaged from male/female values)",
+          "target": 800.0
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex (averaged from male/female values)",
+          "target": 82.5
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 105.0
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form (averaged from male/female values)",
+          "target": 15.0
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 1
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 487.5
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA) (averaged from male/female values)",
+          "target": 1.5
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid) (averaged from male/female values)",
+          "target": 14.5
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "other",
+      "life_stage": "31-50",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value (averaged from male/female values)",
+          "target": 3000.0
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1000,
+          "ul": 2500
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only) (averaged from male/female values)",
+          "target": 370.0
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex (averaged from male/female values)",
+          "target": 13.0
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex (averaged from male/female values)",
+          "target": 9.5
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 30.0
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only (averaged from male/female values)",
+          "target": 800.0
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex (averaged from male/female values)",
+          "target": 82.5
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 105.0
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form (averaged from male/female values)",
+          "target": 15.0
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 1
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 487.5
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA) (averaged from male/female values)",
+          "target": 1.5
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid) (averaged from male/female values)",
+          "target": 14.5
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "other",
+      "life_stage": "51-70",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value (averaged from male/female values)",
+          "target": 3000.0
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value (averaged from male/female values)",
+          "target": 1100.0,
+          "ul": 2000
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only) (averaged from male/female values)",
+          "target": 370.0
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 8
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex (averaged from male/female values)",
+          "target": 9.5
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 25.0
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only (averaged from male/female values)",
+          "target": 800.0
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex (averaged from male/female values)",
+          "target": 82.5
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 15
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 105.0
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form (averaged from male/female values)",
+          "target": 15.0
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 2
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 487.5
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA) (averaged from male/female values)",
+          "target": 1.5
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid) (averaged from male/female values)",
+          "target": 12.5
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    },
+    {
+      "sex": "other",
+      "life_stage": "71+",
+      "values": {
+        "208": {
+          "name": "Calories",
+          "unit": "kcal",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "203": {
+          "name": "Protein",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "204": {
+          "name": "Total Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "205": {
+          "name": "Carbohydrates",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Calculated by macro engine"
+        },
+        "291": {
+          "name": "Dietary Fiber",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Energy-scaled: 14g/1000kcal, min 18g"
+        },
+        "269": {
+          "name": "Total Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "606": {
+          "name": "Saturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "<10% kcal recommended"
+        },
+        "1257": {
+          "name": "Trans Fatty Acids",
+          "unit": "g",
+          "target": 0,
+          "ul": null,
+          "limit": 0,
+          "notes": "Minimize intake"
+        },
+        "1235": {
+          "name": "Added Sugars",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "limit": null,
+          "notes": "\u226410% kcal (calculated)"
+        },
+        "601": {
+          "name": "Cholesterol",
+          "unit": "mg",
+          "target": null,
+          "ul": null,
+          "limit": 300,
+          "notes": "<300mg/day recommended"
+        },
+        "1093": {
+          "name": "Sodium",
+          "unit": "mg",
+          "target": 1500,
+          "ul": null,
+          "limit": 2300,
+          "notes": "AI=1500mg, CDRR=2300mg"
+        },
+        "1092": {
+          "name": "Potassium",
+          "unit": "mg",
+          "notes": "AI value (averaged from male/female values)",
+          "target": 3000.0
+        },
+        "1087": {
+          "name": "Calcium",
+          "unit": "mg",
+          "notes": "RDA value",
+          "target": 1200,
+          "ul": 2000
+        },
+        "1091": {
+          "name": "Phosphorus",
+          "unit": "mg",
+          "target": 700,
+          "ul": 4000,
+          "notes": "RDA value"
+        },
+        "1090": {
+          "name": "Magnesium",
+          "unit": "mg",
+          "ul": 350,
+          "notes": "RDA varies by sex/age, UL=350mg (supplements only) (averaged from male/female values)",
+          "target": 370.0
+        },
+        "1089": {
+          "name": "Iron",
+          "unit": "mg",
+          "ul": 45,
+          "notes": "RDA varies significantly by sex",
+          "target": 8
+        },
+        "1095": {
+          "name": "Zinc",
+          "unit": "mg",
+          "ul": 40,
+          "notes": "RDA varies by sex (averaged from male/female values)",
+          "target": 9.5
+        },
+        "1098": {
+          "name": "Copper",
+          "unit": "\u00b5g",
+          "target": 900,
+          "ul": 10000,
+          "notes": "RDA value"
+        },
+        "1101": {
+          "name": "Manganese",
+          "unit": "mg",
+          "ul": 11,
+          "notes": "AI varies by sex",
+          "target": 2
+        },
+        "1103": {
+          "name": "Selenium",
+          "unit": "\u00b5g",
+          "target": 55,
+          "ul": 400,
+          "notes": "RDA value"
+        },
+        "1096": {
+          "name": "Chromium",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 25.0
+        },
+        "1102": {
+          "name": "Molybdenum",
+          "unit": "\u00b5g",
+          "target": 45,
+          "ul": 2000,
+          "notes": "RDA value"
+        },
+        "1100": {
+          "name": "Iodine",
+          "unit": "\u00b5g",
+          "target": 150,
+          "ul": 1100,
+          "notes": "RDA value"
+        },
+        "1106": {
+          "name": "Vitamin A (RAE)",
+          "unit": "\u00b5g",
+          "ul": 3000,
+          "notes": "RDA varies by sex, UL for preformed vitamin A only (averaged from male/female values)",
+          "target": 800.0
+        },
+        "1162": {
+          "name": "Vitamin C",
+          "unit": "mg",
+          "ul": 2000,
+          "notes": "RDA varies by sex (averaged from male/female values)",
+          "target": 82.5
+        },
+        "1114": {
+          "name": "Vitamin D",
+          "unit": "\u00b5g",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 20
+        },
+        "1109": {
+          "name": "Vitamin E",
+          "unit": "mg",
+          "target": 15,
+          "ul": 1000,
+          "notes": "RDA value"
+        },
+        "1185": {
+          "name": "Vitamin K",
+          "unit": "\u00b5g",
+          "ul": null,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 105.0
+        },
+        "1165": {
+          "name": "Thiamin (B1)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1166": {
+          "name": "Riboflavin (B2)",
+          "unit": "mg",
+          "ul": null,
+          "notes": "RDA varies by sex",
+          "target": 1
+        },
+        "1167": {
+          "name": "Niacin (B3)",
+          "unit": "mg",
+          "ul": 35,
+          "notes": "RDA varies by sex, UL for nicotinic acid form (averaged from male/female values)",
+          "target": 15.0
+        },
+        "1175": {
+          "name": "Vitamin B6",
+          "unit": "mg",
+          "ul": 100,
+          "notes": "RDA varies by age",
+          "target": 2
+        },
+        "1177": {
+          "name": "Folate (DFE)",
+          "unit": "\u00b5g",
+          "target": 400,
+          "ul": 1000,
+          "notes": "RDA value, UL for folic acid form"
+        },
+        "1178": {
+          "name": "Vitamin B12",
+          "unit": "\u00b5g",
+          "target": 2,
+          "ul": null,
+          "notes": "RDA value"
+        },
+        "1170": {
+          "name": "Pantothenic Acid (B5)",
+          "unit": "mg",
+          "target": 5,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1176": {
+          "name": "Biotin",
+          "unit": "\u00b5g",
+          "target": 30,
+          "ul": null,
+          "notes": "AI value"
+        },
+        "1194": {
+          "name": "Choline",
+          "unit": "mg",
+          "ul": 3500,
+          "notes": "AI varies by sex (averaged from male/female values)",
+          "target": 487.5
+        },
+        "645": {
+          "name": "Monounsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "646": {
+          "name": "Polyunsaturated Fat",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "No specific target"
+        },
+        "851": {
+          "name": "Omega-3 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (ALA) (averaged from male/female values)",
+          "target": 1.5
+        },
+        "855": {
+          "name": "Omega-6 Fatty Acids",
+          "unit": "g",
+          "ul": null,
+          "notes": "AI varies by sex (linoleic acid) (averaged from male/female values)",
+          "target": 12.5
+        },
+        "1057": {
+          "name": "Caffeine",
+          "unit": "mg",
+          "target": null,
+          "ul": 400,
+          "notes": "FDA guidance: <400mg/day for adults"
+        },
+        "221": {
+          "name": "Alcohol",
+          "unit": "g",
+          "target": null,
+          "ul": null,
+          "notes": "Moderate intake guidelines apply"
+        }
+      }
+    }
+  ]
+}

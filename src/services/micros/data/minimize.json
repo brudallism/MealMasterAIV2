@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "description": "Nutrients to minimize for optimal health",
+    "last_updated": "2025-09-24",
+    "source": "US DRI 2019-2020, AHA/ACC Guidelines"
+  },
+  "minimize_flags": [
+    {
+      "id": 1257,
+      "name": "Trans Fatty Acids",
+      "reason": "Cardiovascular disease risk",
+      "priority": "high"
+    },
+    {
+      "id": 1258,
+      "name": "Saturated Fat",
+      "reason": "Cardiovascular health (<10% kcal recommended)",
+      "priority": "medium"
+    },
+    {
+      "id": 1253,
+      "name": "Cholesterol",
+      "reason": "Cardiovascular health (<300mg/day)",
+      "priority": "medium"
+    },
+    {
+      "id": 1093,
+      "name": "Sodium",
+      "reason": "Chronic disease risk reduction (<2300mg/day)",
+      "priority": "high"
+    },
+    {
+      "id": 1235,
+      "name": "Added Sugars",
+      "reason": "Metabolic health (<10% total kcal)",
+      "priority": "high"
+    }
+  ]
+}
