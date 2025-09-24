@@ -1,5 +1,6 @@
 // src/stores/user-store.ts
 import { create } from 'zustand';
+import { computeMacros, type Goal, type UserProfile, type MacroTargets } from '../services/macros/engine';
 
 // Privacy consent types
 export interface PrivacyConsents {
@@ -20,6 +21,12 @@ interface UserGoals {
   fat_goal: number;
   fiber_goal: number;
 
+  // Macro engine integration
+  goal_type?: Goal; // 'weight_loss' | 'maintenance' | 'muscle_gain' | 'body_recomposition'
+  macro_engine_version?: string; // Policy version used for calculation
+  last_calculated?: string; // ISO timestamp of last macro calculation
+  calculation_rationale?: string[]; // Debug rationale from macro engine
+
   // V0.2+ Advanced Goals (Expansion Hooks)
   weight_goal?: number;
   activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
@@ -32,15 +39,17 @@ interface User {
   email: string;
   name: string;
   onboarding_completed: boolean;
-  
+
   // V0.2+ Enhanced Profile (Expansion Hooks)
   age?: number;
   height?: number; // cm
   weight?: number; // kg
-  gender?: 'male' | 'female' | 'other';
+  sex?: 'male' | 'female' | 'other'; // Updated to match macro engine
+  gender?: 'male' | 'female' | 'other'; // Deprecated, use sex
+  activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
   timezone?: string;
   preferred_units?: 'metric' | 'imperial';
-  
+
   // V0.3+ Advanced Features
   subscription_status?: 'free' | 'premium' | 'enterprise';
   coaching_preferences?: any;
@@ -119,6 +128,17 @@ interface UserState {
   setLoading: (loading: boolean) => void;
   completeOnboarding: () => void;
   
+  // Macro Engine Actions
+  calculateMacros: (goalType: Goal, force?: boolean) => Promise<void>;
+  setGoalType: (goalType: Goal) => Promise<void>;
+  needsMacroRecalculation: () => boolean;
+  getMacroCalculationStatus: () => {
+    hasValidCalculation: boolean;
+    lastCalculated?: string;
+    engineVersion?: string;
+    rationale?: string[];
+  };
+
   // V0.2+ Enhanced Actions (Future Implementation Hooks)
   updatePersonalization: (updates: Partial<UserPersonalization>) => void;
   startSession: () => void;
@@ -290,9 +310,150 @@ export const useUserStore = create<UserState>((set, get) => ({
     achievements: [...state.achievements, achievement]
   })),
   
-  updateProfile: (updates: Partial<User>) => set((state) => ({
-    user: state.user ? { ...state.user, ...updates } : null
-  })),
+  updateProfile: (updates: Partial<User>) => {
+    set((state) => ({
+      user: state.user ? { ...state.user, ...updates } : null
+    }));
+    // Trigger macro recalculation if profile changes affect calculations
+    const affectedFields = ['age', 'height', 'weight', 'sex', 'preferred_units'];
+    if (Object.keys(updates).some(key => affectedFields.includes(key))) {
+      const state = get();
+      if (state.goals.goal_type && state.needsMacroRecalculation()) {
+        console.log('Profile change detected, triggering macro recalculation');
+        state.calculateMacros(state.goals.goal_type, true);
+      }
+    }
+  },
+
+  // Macro Engine Implementation
+  calculateMacros: async (goalType: Goal, force = false) => {
+    const state = get();
+
+    // Check if recalculation is needed
+    if (!force && !state.needsMacroRecalculation()) {
+      console.log('Macro calculation skipped - no changes detected');
+      return;
+    }
+
+    const user = state.user;
+    if (!user || !user.age || !user.height || !user.weight || !user.sex) {
+      console.warn('Cannot calculate macros - missing required profile data');
+      return;
+    }
+
+    try {
+      // Convert user data to macro engine profile format
+      const profile: UserProfile = {
+        sex: user.sex,
+        age_years: user.age,
+        height: {
+          value: user.height,
+          unit: 'cm' // Internal storage is always cm
+        },
+        weight: {
+          value: user.weight,
+          unit: 'kg' // Internal storage is always kg
+        },
+        activity_level: user.activity_level || 'moderate',
+        unit_system_preference: user.preferred_units || 'metric'
+      };
+
+      console.log('Computing macros with profile:', {
+        sex: profile.sex,
+        age: profile.age_years,
+        weight: `${profile.weight.value}${profile.weight.unit}`,
+        height: `${profile.height.value}${profile.height.unit}`,
+        activity: profile.activity_level,
+        goal: goalType
+      });
+
+      const macroTargets = computeMacros(profile, goalType);
+
+      // Log rationale for debugging
+      console.group('🎯 Macro Calculation Results');
+      console.log('Targets:', {
+        calories: macroTargets.kcal_target,
+        protein: `${macroTargets.protein_g}g`,
+        carbs: `${macroTargets.carb_g}g`,
+        fat: `${macroTargets.fat_g}g`,
+        fiber: `${macroTargets.fiber_g}g`
+      });
+      console.log('Rationale:');
+      macroTargets.rationale.forEach((reason, index) => {
+        console.log(`  ${index + 1}. ${reason}`);
+      });
+      console.groupEnd();
+
+      // Update goals with calculated values
+      set((state) => ({
+        goals: {
+          ...state.goals,
+          daily_calorie_goal: macroTargets.kcal_target,
+          protein_goal: macroTargets.protein_g,
+          carb_goal: macroTargets.carb_g,
+          fat_goal: macroTargets.fat_g,
+          fiber_goal: macroTargets.fiber_g,
+          goal_type: goalType,
+          macro_engine_version: '1.0.0', // From POLICY_DEFAULTS
+          last_calculated: new Date().toISOString(),
+          calculation_rationale: macroTargets.rationale
+        }
+      }));
+
+    } catch (error) {
+      console.error('Failed to calculate macros:', error);
+    }
+  },
+
+  setGoalType: async (goalType: Goal) => {
+    set((state) => ({
+      goals: {
+        ...state.goals,
+        goal_type: goalType
+      }
+    }));
+    // Recalculate macros with new goal type
+    await get().calculateMacros(goalType, true);
+  },
+
+  needsMacroRecalculation: () => {
+    const state = get();
+    const goals = state.goals;
+
+    // Need recalculation if:
+    // 1. Never calculated before
+    if (!goals.last_calculated || !goals.macro_engine_version) {
+      return true;
+    }
+
+    // 2. Policy version changed
+    const currentPolicyVersion = '1.0.0'; // From POLICY_DEFAULTS
+    if (goals.macro_engine_version !== currentPolicyVersion) {
+      return true;
+    }
+
+    // 3. Calculated more than 24 hours ago (safety check)
+    const lastCalculated = new Date(goals.last_calculated);
+    const now = new Date();
+    const hoursAgo = (now.getTime() - lastCalculated.getTime()) / (1000 * 60 * 60);
+    if (hoursAgo > 24) {
+      return true;
+    }
+
+    return false;
+  },
+
+  getMacroCalculationStatus: () => {
+    const state = get();
+    const goals = state.goals;
+
+    return {
+      hasValidCalculation: !state.needsMacroRecalculation(),
+      lastCalculated: goals.last_calculated,
+      engineVersion: goals.macro_engine_version,
+      rationale: goals.calculation_rationale
+    };
+  },
   
   // Onboarding helpers
   needsOnboarding: () => {

@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useUserStore } from '../stores/user-store';
 import { useMicronutrientsStore } from '../stores/micronutrients-store';
 import SentryTestButton from '../components/atoms/SentryTestButton';
+import { Goal } from '../services/macros/engine';
 
 type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active';
 
@@ -34,7 +35,7 @@ interface UserProfile {
 
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user, updateProfile, setGoals } = useUserStore();
+  const { user, goals, updateProfile, setGoals, setGoalType, calculateMacros, getMacroCalculationStatus } = useUserStore();
   const { getOrderedDisplayList } = useMicronutrientsStore();
 
   // Unit system state
@@ -47,12 +48,15 @@ const SettingsScreen: React.FC = () => {
     age: user?.age?.toString() || '',
     weight: user?.weight?.toString() || '',
     height: user?.height?.toString() || '',
-    activityLevel: 'moderately_active',
+    activityLevel: user?.activity_level === 'light' ? 'lightly_active' :
+                   user?.activity_level === 'moderate' ? 'moderately_active' :
+                   user?.activity_level === 'active' ? 'very_active' :
+                   user?.activity_level === 'very_active' ? 'extra_active' : 'moderately_active',
     macroGoals: {
-      calories: '',
-      protein: '',
-      carbs: '',
-      fat: '',
+      calories: goals.daily_calorie_goal?.toString() || '',
+      protein: goals.protein_goal?.toString() || '',
+      carbs: goals.carb_goal?.toString() || '',
+      fat: goals.fat_goal?.toString() || '',
     },
   });
 
@@ -108,6 +112,34 @@ const SettingsScreen: React.FC = () => {
 
   const [isManualMacros, setIsManualMacros] = useState(false);
 
+  // Goal type selection state
+  const [selectedGoalType, setSelectedGoalType] = useState<Goal>(
+    goals.goal_type || 'maintenance'
+  );
+
+  const goalTypes: Array<{ key: Goal; label: string; description: string }> = [
+    {
+      key: 'weight_loss',
+      label: 'Weight Loss',
+      description: '300-400 kcal deficit to lose 0.5-1 lb/week sustainably'
+    },
+    {
+      key: 'maintenance',
+      label: 'Maintenance',
+      description: 'Maintain current weight with balanced nutrition'
+    },
+    {
+      key: 'muscle_gain',
+      label: 'Muscle Gain',
+      description: 'Slight surplus (~7%) to support lean muscle growth'
+    },
+    {
+      key: 'body_recomposition',
+      label: 'Body Recomposition',
+      description: 'Simultaneously build muscle and lose fat'
+    }
+  ];
+
   const activityLevels: Array<{ key: ActivityLevel; label: string; description: string }> = [
     { key: 'sedentary', label: 'Sedentary', description: 'Little/no exercise' },
     { key: 'lightly_active', label: 'Lightly Active', description: 'Light exercise 1-3 days/week' },
@@ -116,7 +148,8 @@ const SettingsScreen: React.FC = () => {
     { key: 'extra_active', label: 'Extra Active', description: 'Very hard exercise & physical job' },
   ];
 
-  const calculateMacros = () => {
+  const handleCalculateMacros = async () => {
+    // Validate required profile data
     const weight = parseFloat(profile.weight);
     const height = parseFloat(profile.height);
     const age = parseInt(profile.age);
@@ -126,40 +159,32 @@ const SettingsScreen: React.FC = () => {
       return;
     }
 
-    // Calculate BMR using Mifflin-St Jeor Equation (assuming male for simplicity)
-    const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    if (!user?.sex) {
+      Alert.alert('Missing Information', 'Please specify your sex in your profile to calculate accurate macros.');
+      return;
+    }
 
-    // Activity multipliers
-    const activityMultipliers: Record<ActivityLevel, number> = {
-      sedentary: 1.2,
-      lightly_active: 1.375,
-      moderately_active: 1.55,
-      very_active: 1.725,
-      extra_active: 1.9,
-    };
+    try {
+      // Calculate macros using the new engine
+      await calculateMacros(selectedGoalType, true);
 
-    const tdee = bmr * activityMultipliers[profile.activityLevel];
-    const calories = Math.round(tdee);
+      // Get the calculation status for display
+      const status = getMacroCalculationStatus();
 
-    // Standard macro split: 30% protein, 40% carbs, 30% fat
-    const protein = Math.round((calories * 0.3) / 4); // 4 cal per gram
-    const carbs = Math.round((calories * 0.4) / 4); // 4 cal per gram
-    const fat = Math.round((calories * 0.3) / 9); // 9 cal per gram
-
-    setProfile(prev => ({
-      ...prev,
-      macroGoals: {
-        calories: calories.toString(),
-        protein: protein.toString(),
-        carbs: carbs.toString(),
-        fat: fat.toString(),
-      },
-    }));
-
-    Alert.alert(
-      'Macros Calculated',
-      `Based on your profile:\nCalories: ${calories}\nProtein: ${protein}g\nCarbs: ${carbs}g\nFat: ${fat}g`,
-    );
+      Alert.alert(
+        'Macros Calculated! 🎯',
+        `Your macro targets have been calculated using evidence-based formulas:\n\n` +
+        `🔥 Calories: ${goals.daily_calorie_goal}\n` +
+        `💪 Protein: ${goals.protein_goal}g\n` +
+        `🌾 Carbs: ${goals.carb_goal}g\n` +
+        `🥑 Fat: ${goals.fat_goal}g\n` +
+        `🌿 Fiber: ${goals.fiber_goal}g\n\n` +
+        `Last calculated: ${status.lastCalculated ? new Date(status.lastCalculated).toLocaleString() : 'just now'}`,
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to calculate macros. Please try again.');
+      console.error('Macro calculation error:', error);
+    }
   };
 
   const handleSave = () => {
@@ -176,9 +201,19 @@ const SettingsScreen: React.FC = () => {
       weight: parseFloat(profile.weight) || undefined,
       height: parseFloat(profile.height) || undefined,
       preferred_units: unitSystem,
+      activity_level: profile.activityLevel === 'lightly_active' ? 'light' :
+                     profile.activityLevel === 'moderately_active' ? 'moderate' :
+                     profile.activityLevel === 'very_active' ? 'active' :
+                     profile.activityLevel === 'extra_active' ? 'very_active' : 'sedentary',
+      sex: user?.sex || user?.gender, // Use existing sex/gender
     };
 
     updateProfile(updatedUser);
+
+    // Update goal type if changed
+    if (selectedGoalType !== goals.goal_type) {
+      setGoalType(selectedGoalType);
+    }
 
     // Update goals if they are set
     const calories = parseInt(profile.macroGoals.calories);
@@ -192,6 +227,7 @@ const SettingsScreen: React.FC = () => {
         protein_goal: protein,
         carb_goal: carbs,
         fat_goal: fat,
+        fiber_goal: goals.fiber_goal || 25, // Default or current fiber goal
       });
     }
 
@@ -367,13 +403,50 @@ const SettingsScreen: React.FC = () => {
           ))}
         </View>
 
+        {/* Goal Type Selection */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Goal Type</Text>
+          {goalTypes.map((goalType) => (
+            <TouchableOpacity
+              key={goalType.key}
+              style={[
+                styles.goalTypeOption,
+                selectedGoalType === goalType.key && styles.goalTypeOptionSelected,
+              ]}
+              onPress={() => setSelectedGoalType(goalType.key)}
+            >
+              <View style={styles.goalTypeInfo}>
+                <Text
+                  style={[
+                    styles.goalTypeLabel,
+                    selectedGoalType === goalType.key && styles.goalTypeLabelSelected,
+                  ]}
+                >
+                  {goalType.label}
+                </Text>
+                <Text
+                  style={[
+                    styles.goalTypeDescription,
+                    selectedGoalType === goalType.key && styles.goalTypeDescriptionSelected,
+                  ]}
+                >
+                  {goalType.description}
+                </Text>
+              </View>
+              {selectedGoalType === goalType.key && (
+                <Ionicons name="checkmark-circle" size={24} color="#4F46E5" />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {/* Macro Goals */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Macro Goals</Text>
             <TouchableOpacity
               style={styles.calculateButton}
-              onPress={calculateMacros}
+              onPress={handleCalculateMacros}
             >
               <Ionicons name="calculator" size={16} color="#4F46E5" />
               <Text style={styles.calculateButtonText}>Calculate</Text>
@@ -757,6 +830,45 @@ const styles = StyleSheet.create({
   },
   unitToggleTextActive: {
     color: '#FFFFFF',
+  },
+  // Goal type selection styles
+  goalTypeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  goalTypeOptionSelected: {
+    borderColor: '#4F46E5',
+    backgroundColor: '#F8FAFC',
+  },
+  goalTypeInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  goalTypeLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  goalTypeLabelSelected: {
+    color: '#4F46E5',
+    fontWeight: '600',
+  },
+  goalTypeDescription: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+  },
+  goalTypeDescriptionSelected: {
+    color: '#6366F1',
   },
   micronutrientUnit: {
     fontSize: 12,
