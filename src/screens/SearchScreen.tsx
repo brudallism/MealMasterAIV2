@@ -11,8 +11,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { FoodLookupResult } from '../services/api/types';
+import { UnifiedMealItem } from '../types/unified-meal-item';
+import { DietaryPreferences, createDietaryPreferences } from '../types/dietary';
 import { useSearchStore } from '../stores/search-store';
 import { useCart } from '../stores/cart-store';
+import { useUnifiedFavoritesStore } from '../stores/unified-favorites-store';
+import { unifiedSearchService } from '../services/unified-search-service';
 import FoodDetailModal from '../components/organisms/FoodDetailModal';
 import MealBasketModal from '../components/organisms/MealBasketModal';
 import BarcodeScanner from '../components/organisms/BarcodeScanner';
@@ -21,10 +25,11 @@ import { FloatingChatBubbleWrapper } from '../components/atoms/FloatingChatBubbl
 export default function SearchScreen() {
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [showFoodModal, setShowFoodModal] = useState(false);
-  const [selectedFood, setSelectedFood] = useState<FoodLookupResult | null>(null);
+  const [selectedFood, setSelectedFood] = useState<UnifiedMealItem | null>(null);
   const [showBasketModal, setShowBasketModal] = useState(false);
   const [wasOpenedFromBarcode, setWasOpenedFromBarcode] = useState(false);
   const [activeTab, setActiveTab] = useState<'search' | 'recents' | 'favorites'>('search');
+  const [searchMode, setSearchMode] = useState<'foods' | 'recipes'>('foods');
   
   const {
     currentQuery,
@@ -38,18 +43,58 @@ export default function SearchScreen() {
     addToSearchHistory,
     addRecentFood,
     recentFoods,
-    starredFoods,
     getRecentFoods,
-    getStarredByCategory,
-    toggleStarred,
-    isStarred
+    getStarredByCategory
   } = useSearchStore();
   
   const { addToCart, itemCount } = useCart();
 
+  // Unified favorites store
+  const {
+    addToFavorites,
+    removeFromFavorites,
+    isFavorite,
+    getFavoritesByType,
+    migrateLegacyFavorites
+  } = useUnifiedFavoritesStore();
+
+  // Default dietary preferences (TODO: get from user settings)
+  const defaultDietaryPreferences = createDietaryPreferences();
+
   // Request cancellation for race condition prevention
   const abortControllerRef = useRef<AbortController | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Migration from legacy favorites system to unified favorites on app startup
+  useEffect(() => {
+    const performMigration = async () => {
+      try {
+        // Get legacy starred foods from the search store
+        const legacyStarredFoods = getStarredByCategory();
+
+        console.log('[SearchScreen] Performing favorites migration:', {
+          legacyStarredCount: legacyStarredFoods.length
+        });
+
+        // Migrate to unified favorites store
+        await migrateLegacyFavorites(legacyStarredFoods, []);
+
+        console.log('[SearchScreen] Favorites migration completed');
+      } catch (error) {
+        console.error('[SearchScreen] Migration error:', error);
+      }
+    };
+
+    performMigration();
+  }, []); // Run once on component mount
+
+  // Re-search when search mode changes
+  useEffect(() => {
+    if (currentQuery.trim()) {
+      console.log('[SearchScreen] Search mode changed, re-searching:', searchMode);
+      handleSearch(currentQuery);
+    }
+  }, [searchMode]); // Re-search when mode changes
 
   // Smart query normalization for consistent results
   const normalizeQuery = (query: string): string => {
@@ -204,6 +249,163 @@ export default function SearchScreen() {
     return finalResults;
   };
 
+  // Legacy USDA search function - preserves all existing search logic
+  const legacyUSDASearch = async (query: string) => {
+    // Get API key
+    const apiKey = process.env.EXPO_PUBLIC_USDA_API_KEY;
+    if (!apiKey) {
+      throw new Error('USDA API key not configured');
+    }
+
+    const normalizedQuery = query.trim();
+    const smartQueries = generateSmartQueries(normalizedQuery);
+
+    console.log('[SearchScreen] Smart queries generated:', smartQueries);
+
+    // Execute searches for all query variations
+    let allFoods: any[] = [];
+
+    for (const queryVariation of smartQueries) {
+      console.log('[SearchScreen] Searching for:', queryVariation);
+
+      const response = await fetch(
+        `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${apiKey}&query=${encodeURIComponent(queryVariation)}&pageSize=20`
+      );
+
+      if (!response.ok) {
+        console.warn(`Query "${queryVariation}" failed:`, response.status);
+        continue;
+      }
+
+      const data = await response.json();
+      if (data.foods && data.foods.length > 0) {
+        allFoods.push(...data.foods);
+      }
+    }
+
+    // Remove duplicates by fdcId
+    const uniqueFoods = allFoods.reduce((acc: any[], food: any) => {
+      if (!acc.find((f: any) => f.fdcId === food.fdcId)) {
+        acc.push(food);
+      }
+      return acc;
+    }, [] as any[]);
+
+    console.log('[SearchScreen] Total unique foods from all queries:', uniqueFoods.length);
+
+    if (uniqueFoods.length === 0) {
+      return {
+        ingredients: [],
+        products: [],
+        recipes: [],
+        total: 0,
+        fromCache: false,
+        searchTime: 0
+      };
+    }
+
+    // Apply optimization with Foundation food prioritization and cooked/raw logic
+    const optimizedFoods = optimizeResults(uniqueFoods, normalizedQuery);
+
+    // Get the food IDs for detailed nutrition lookup
+    const foodIds = optimizedFoods.map((food: any) => food.fdcId);
+
+    if (foodIds.length === 0) {
+      return {
+        ingredients: [],
+        products: [],
+        recipes: [],
+        total: 0,
+        fromCache: false,
+        searchTime: 0
+      };
+    }
+
+    // Get detailed nutrition data for all foods in one request
+    const nutritionResponse = await fetch(
+      `https://api.nal.usda.gov/fdc/v1/foods?api_key=${apiKey}&fdcIds=${foodIds.join(',')}`
+    );
+
+    if (!nutritionResponse.ok) {
+      throw new Error(`Nutrition API request failed: ${nutritionResponse.status}`);
+    }
+
+    const nutritionData = await nutritionResponse.json();
+    console.log('USDA Nutrition API response:', nutritionData.length, 'foods with detailed nutrition');
+
+    // Create a map for quick nutrition lookup
+    const nutritionMap = new Map();
+    nutritionData.forEach((food: any) => {
+      nutritionMap.set(food.fdcId, food);
+    });
+
+    // Convert optimized USDA response to our FoodLookupResult format
+    const foods: FoodLookupResult[] = optimizedFoods.map((food: any) => {
+      const detailedFood = nutritionMap.get(food.fdcId);
+      const nutrients = detailedFood?.foodNutrients || [];
+
+      // Create display name with brand for branded foods
+      const baseName = food.description || 'Unknown food';
+      const brandName = food.brandOwner;
+      const displayName = brandName ? `${baseName} - ${brandName}` : baseName;
+
+      // Extract micronutrients from USDA data
+      const micronutrients: { [id: number]: { amount: number; unit: string } } = {};
+      nutrients.forEach((nutrient: any) => {
+        if (nutrient.nutrient?.id && nutrient.amount !== undefined) {
+          micronutrients[nutrient.nutrient.id] = {
+            amount: nutrient.amount,
+            unit: nutrient.nutrient.unitName || 'g'
+          };
+        }
+      });
+
+      return {
+        id: `usda_${food.fdcId}`,
+        name: displayName,
+        brand: brandName,
+        category: food.foodCategory || 'ingredient',
+        nutrition: {
+          per100g: {
+            calories: extractNutrient(nutrients, 1008) || 0, // Energy
+            protein: extractNutrient(nutrients, 1003) || 0, // Protein
+            carbs: extractNutrient(nutrients, 1005) || 0, // Carbs
+            fat: extractNutrient(nutrients, 1004) || 0, // Fat
+            fiber: extractNutrient(nutrients, 1079) || 0, // Fiber
+          },
+          servingSize: '100g',
+          micronutrients: Object.keys(micronutrients).length > 0 ? micronutrients : undefined
+        },
+        source: {
+          api: 'usda' as const,
+          id: food.fdcId.toString(),
+          dataType: food.dataType,
+          lastUpdated: new Date().toISOString()
+        },
+        metadata: {
+          confidence: 0.8,
+          warnings: []
+        }
+      };
+    });
+
+    // Log final optimized results
+    console.log('[SearchScreen] Final optimized results:', foods.map((f, i) =>
+      `${i+1}. ${f.name} (${f.source.dataType})`
+    ).join(', '));
+
+    // Return in the format expected by unified search service
+    return {
+      ingredients: foods,
+      products: [],
+      recipes: [],
+      total: foods.length,
+      fromCache: false,
+      searchTime: 0
+    };
+  };
+
+  // New unified search handler
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResults(null);
@@ -218,185 +420,88 @@ export default function SearchScreen() {
 
     // Create new abort controller for this request
     abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
 
     setIsSearching(true);
     setSearchError(null);
-    
+
     try {
-      // Get API key
-      const apiKey = process.env.EXPO_PUBLIC_USDA_API_KEY;
-      if (!apiKey) {
-        throw new Error('USDA API key not configured');
-      }
+      console.log('[SearchScreen] Using unified search service for query:', query, 'mode:', searchMode);
 
-      const normalizedQuery = query.trim();
-      const smartQueries = generateSmartQueries(normalizedQuery);
-      
-      console.log('[SearchScreen] Smart queries generated:', smartQueries);
+      let unifiedResults;
 
-      // Execute searches for all query variations
-      let allFoods: any[] = [];
-      
-      for (const queryVariation of smartQueries) {
-        console.log('[SearchScreen] Searching for:', queryVariation);
-        
-        const response = await fetch(
-          `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${apiKey}&query=${encodeURIComponent(queryVariation)}&pageSize=20`,
-          { signal }
+      if (searchMode === 'recipes') {
+        // Search for recipes using Spoonacular
+        unifiedResults = await unifiedSearchService.searchRecipes(
+          query,
+          defaultDietaryPreferences,
+          {
+            number: 12,
+            offset: 0
+          }
         );
-
-        if (!response.ok) {
-          console.warn(`Query "${queryVariation}" failed:`, response.status);
-          continue;
-        }
-
-        const data = await response.json();
-        if (data.foods && data.foods.length > 0) {
-          allFoods.push(...data.foods);
-        }
+      } else {
+        // Search for foods using USDA (existing functionality)
+        unifiedResults = await unifiedSearchService.searchFoods(query, legacyUSDASearch);
       }
-      
-      // Remove duplicates by fdcId
-      const uniqueFoods = allFoods.reduce((acc: any[], food: any) => {
-        if (!acc.find((f: any) => f.fdcId === food.fdcId)) {
-          acc.push(food);
-        }
-        return acc;
-      }, [] as any[]);
-      
-      console.log('[SearchScreen] Total unique foods from all queries:', uniqueFoods.length);
-      
-      if (uniqueFoods.length === 0) {
-        const searchResults = {
-          ingredients: [],
-          products: [],
-          recipes: [],
-          total: 0,
-          fromCache: false,
-          searchTime: 0
-        };
-        
-        setSearchResults(searchResults);
-        addToSearchHistory(query, 0);
-        return;
-      }
-      
-      // Apply optimization with Foundation food prioritization and cooked/raw logic
-      const optimizedFoods = optimizeResults(uniqueFoods, normalizedQuery);
-      
-      // Get the food IDs for detailed nutrition lookup
-      const foodIds = optimizedFoods.map((food: any) => food.fdcId);
-      
-      if (foodIds.length === 0) {
-        const searchResults = {
-          ingredients: [],
-          products: [],
-          recipes: [],
-          total: 0,
-          fromCache: false,
-          searchTime: 0
-        };
-        
-        setSearchResults(searchResults);
-        addToSearchHistory(query, 0);
-        return;
-      }
-      
-      // Get detailed nutrition data for all foods in one request
-      const nutritionResponse = await fetch(
-        `https://api.nal.usda.gov/fdc/v1/foods?api_key=${apiKey}&fdcIds=${foodIds.join(',')}`,
-        { signal }
-      );
-      
-      if (!nutritionResponse.ok) {
-        throw new Error(`Nutrition API request failed: ${nutritionResponse.status}`);
-      }
-      
-      const nutritionData = await nutritionResponse.json();
-      console.log('USDA Nutrition API response:', nutritionData.length, 'foods with detailed nutrition'); // Debug log
-      
-      // Create a map for quick nutrition lookup
-      const nutritionMap = new Map();
-      nutritionData.forEach((food: any) => {
-        nutritionMap.set(food.fdcId, food);
-      });
-      
-      // Convert optimized USDA response to our FoodLookupResult format
-      const foods: FoodLookupResult[] = optimizedFoods.map((food: any) => {
-        const detailedFood = nutritionMap.get(food.fdcId);
-        const nutrients = detailedFood?.foodNutrients || [];
 
-        // Create display name with brand for branded foods
-        const baseName = food.description || 'Unknown food';
-        const brandName = food.brandOwner;
-        const displayName = brandName ? `${baseName} - ${brandName}` : baseName;
-
-        // Extract micronutrients from USDA data
-        const micronutrients: { [id: number]: { amount: number; unit: string } } = {};
-        nutrients.forEach((nutrient: any) => {
-          if (nutrient.nutrient?.id && nutrient.amount !== undefined) {
-            micronutrients[nutrient.nutrient.id] = {
-              amount: nutrient.amount,
-              unit: nutrient.nutrient.unitName || 'g'
-            };
-          }
-        });
-
-        return {
-          id: `usda_${food.fdcId}`,
-          name: displayName,
-          brand: brandName,
-          category: food.foodCategory || 'ingredient',
-          nutrition: {
-            per100g: {
-              calories: extractNutrient(nutrients, 1008) || 0, // Energy
-              protein: extractNutrient(nutrients, 1003) || 0, // Protein
-              carbs: extractNutrient(nutrients, 1005) || 0, // Carbs
-              fat: extractNutrient(nutrients, 1004) || 0, // Fat
-              fiber: extractNutrient(nutrients, 1079) || 0, // Fiber
-            },
-            servingSize: '100g',
-            micronutrients: Object.keys(micronutrients).length > 0 ? micronutrients : undefined
+      // Convert UnifiedMealItem[] back to legacy SearchResults format for backward compatibility
+      const foods: FoodLookupResult[] = unifiedResults.items.map((unifiedItem: UnifiedMealItem) => ({
+        id: unifiedItem.id,
+        name: unifiedItem.title,
+        brand: unifiedItem.brandOwner || (unifiedItem.type === 'recipe' ? 'Recipe' : undefined),
+        category: unifiedItem.type === 'ingredient' ? 'ingredient' :
+                 unifiedItem.type === 'product' ? 'product' :
+                 unifiedItem.type === 'recipe' ? 'recipe' : 'food',
+        nutrition: {
+          per100g: {
+            calories: unifiedItem.nutrition?.per_serving.calories || 0,
+            protein: unifiedItem.nutrition?.per_serving.protein || 0,
+            carbs: unifiedItem.nutrition?.per_serving.carbs || 0,
+            fat: unifiedItem.nutrition?.per_serving.fat || 0,
+            fiber: unifiedItem.nutrition?.per_serving.fiber || 0,
           },
-          source: {
-            api: 'usda' as const,
-            id: food.fdcId.toString(),
-            dataType: food.dataType,
-            lastUpdated: new Date().toISOString()
-          },
-          metadata: {
-            confidence: 0.8,
-            warnings: []
-          }
-        };
-      });
-      
-      // Log final optimized results
-      console.log('[SearchScreen] Final optimized results:', foods.map((f, i) => 
-        `${i+1}. ${f.name} (${f.source.dataType})`
-      ).join(', '));
-      
-      // Convert to the format the UI expects
+          servingSize: unifiedItem.type === 'recipe' ? `${unifiedItem.servings || 1} servings` : '100g'
+        },
+        source: {
+          api: unifiedItem.source,
+          id: unifiedItem.originalId.toString(),
+          lastUpdated: unifiedItem.metadata?.lastUpdated || new Date().toISOString()
+        },
+        metadata: {
+          confidence: unifiedItem.metadata?.searchRelevance || 0.8,
+          warnings: [],
+          // Add recipe-specific metadata for UI
+          readyInMinutes: unifiedItem.readyInMinutes,
+          healthScore: unifiedItem.healthScore,
+          foodIcon: unifiedItem.type === 'recipe' ? '🍽️' : undefined
+        }
+      }));
+
+      // Organize results by type for proper section rendering
+      const ingredients = foods.filter(item => item.category === 'ingredient');
+      const products = foods.filter(item => item.category === 'product');
+      const recipes = foods.filter(item => item.category === 'recipe');
+      const otherFoods = foods.filter(item => !['ingredient', 'product', 'recipe'].includes(item.category));
+
       const searchResults = {
-        ingredients: foods,
-        products: [],
-        recipes: [],
+        ingredients: searchMode === 'recipes' ? [] : [...ingredients, ...otherFoods],
+        products: searchMode === 'recipes' ? [] : products,
+        recipes: searchMode === 'recipes' ? recipes : [],
         total: foods.length,
         fromCache: false,
         searchTime: 0
       };
-      
+
       setSearchResults(searchResults);
       addToSearchHistory(query, searchResults.total);
-      
+
     } catch (error) {
       // Don't show errors for aborted requests (user typed more)
       if (error instanceof Error && error.name === 'AbortError') {
         console.log('[SearchScreen] Search aborted - user typed more');
         return;
       }
-      
+
       console.error('Search error:', error);
       setSearchError(error instanceof Error ? error.message : 'Search failed');
     } finally {
@@ -484,7 +589,41 @@ export default function SearchScreen() {
   );
 
   const handleFoodItemClick = (food: FoodLookupResult) => {
-    setSelectedFood(food);
+    // Convert FoodLookupResult to UnifiedMealItem for FoodDetailModal
+    const isRecipe = food.category === 'recipe';
+
+    const unifiedFood: UnifiedMealItem = {
+      id: food.id,
+      source: food.source.api as 'usda' | 'spoonacular',
+      originalId: food.id.replace(/^(usda_|spoonacular_)/, ''),
+      title: food.name,
+      type: food.category === 'ingredient' ? 'ingredient' :
+            food.category === 'product' ? 'product' :
+            food.category === 'recipe' ? 'recipe' : 'food',
+      brandOwner: food.brand,
+      // Recipe-specific properties
+      ...(isRecipe && {
+        readyInMinutes: food.metadata?.readyInMinutes,
+        healthScore: food.metadata?.healthScore,
+        servings: food.nutrition.servingSize ? parseInt(food.nutrition.servingSize) : undefined
+      }),
+      nutrition: {
+        per_serving: {
+          calories: food.nutrition.per100g.calories,
+          protein: food.nutrition.per100g.protein,
+          carbs: food.nutrition.per100g.carbs,
+          fat: food.nutrition.per100g.fat,
+          fiber: food.nutrition.per100g.fiber,
+        }
+      },
+      metadata: {
+        searchRelevance: food.metadata.confidence,
+        lastUpdated: food.source.lastUpdated,
+        tags: [food.source.api]
+      }
+    };
+
+    setSelectedFood(unifiedFood);
     setShowFoodModal(true);
     setWasOpenedFromBarcode(false); // Not from barcode scanner
   };
@@ -498,20 +637,20 @@ export default function SearchScreen() {
     }
   };
 
-  const handleAddToMeal = (food: FoodLookupResult, quantity: number, unit: string) => {
-    // Convert FoodLookupResult to the format expected by stores with safety guards
+  const handleAddToMeal = (food: UnifiedMealItem, quantity: number, unit: string) => {
+    // Convert UnifiedMealItem to the format expected by stores with safety guards
     const convertedFood = {
       id: food.id,
-      name: food.name,
-      calories: food.nutrition.per100g.calories || 0,
-      protein: food.nutrition.per100g.protein || 0,
-      carbs: food.nutrition.per100g.carbs || 0,
-      fat: food.nutrition.per100g.fat || 0,
-      fiber: food.nutrition.per100g.fiber || 0,
-      serving_size: food.nutrition.servingSize || '100g',
-      source: food.source.api,
-      category: 'ingredient',
-      confidence: 1
+      name: food.title,
+      calories: food.nutrition?.per_serving.calories || 0,
+      protein: food.nutrition?.per_serving.protein || 0,
+      carbs: food.nutrition?.per_serving.carbs || 0,
+      fat: food.nutrition?.per_serving.fat || 0,
+      fiber: food.nutrition?.per_serving.fiber || 0,
+      serving_size: '100g', // UnifiedMealItem uses per_serving basis
+      source: food.source,
+      category: food.type,
+      confidence: food.metadata?.searchRelevance || 0.8
     };
     
     // Add to recent foods for quick access
@@ -520,7 +659,7 @@ export default function SearchScreen() {
     // Add to cart with specified serving
     addToCart(convertedFood, quantity, unit);
 
-    console.log(`Added to meal: ${food.name} (${quantity} ${unit})`);
+    console.log(`Added to meal: ${food.title} (${quantity} ${unit})`);
 
     // Close food modal and only reopen scanner if it was originally opened from barcode scanner
     setShowFoodModal(false);
@@ -581,9 +720,34 @@ export default function SearchScreen() {
     console.log('📝 Setting selectedFood to:', product.name);
     console.log('📱 Closing barcode scanner and showing food modal');
 
+    // Convert FoodLookupResult to UnifiedMealItem for FoodDetailModal
+    const unifiedProduct: UnifiedMealItem = {
+      id: product.id,
+      source: 'usda',
+      originalId: product.id.replace('usda_', ''),
+      title: product.name,
+      type: product.category === 'ingredient' ? 'ingredient' :
+            product.category === 'product' ? 'product' : 'food',
+      brandOwner: product.brand,
+      nutrition: {
+        per_serving: {
+          calories: product.nutrition.per100g.calories,
+          protein: product.nutrition.per100g.protein,
+          carbs: product.nutrition.per100g.carbs,
+          fat: product.nutrition.per100g.fat,
+          fiber: product.nutrition.per100g.fiber,
+        }
+      },
+      metadata: {
+        searchRelevance: product.metadata.confidence,
+        lastUpdated: product.source.lastUpdated,
+        tags: ['usda', 'barcode']
+      }
+    };
+
     // Close barcode scanner and show food detail modal
     setShowBarcodeScanner(false);
-    setSelectedFood(product);
+    setSelectedFood(unifiedProduct);
     setShowFoodModal(true);
     setWasOpenedFromBarcode(true); // Mark that this was opened from barcode scanner
 
@@ -591,25 +755,48 @@ export default function SearchScreen() {
   };
 
   const renderFoodItem = ({ item }: { item: FoodLookupResult }) => {
-    const isItemStarred = isStarred(item.id);
+    const isItemStarred = isFavorite(item.id);
+    const isRecipe = item.category === 'recipe';
 
     const handleToggleStar = async (e: any) => {
       e.stopPropagation();
-      // Convert back to MealItem format for the store
-      const mealItem = {
-        id: item.id,
-        name: item.name,
-        calories: item.nutrition.per100g.calories,
-        protein: item.nutrition.per100g.protein,
-        carbs: item.nutrition.per100g.carbs,
-        fat: item.nutrition.per100g.fat,
-        fiber: item.nutrition.per100g.fiber,
-        serving_size: item.nutrition.servingSize,
-        source: item.source.api,
-        category: item.category,
-        confidence: item.metadata.confidence
-      };
-      await toggleStarred(mealItem);
+
+      if (isItemStarred) {
+        await removeFromFavorites(item.id);
+      } else {
+        // Convert FoodLookupResult to UnifiedMealItem for unified favorites store
+        const unifiedItem: UnifiedMealItem = {
+          id: item.id,
+          source: item.source.api as 'usda' | 'spoonacular',
+          originalId: item.id.replace(/^(usda_|spoonacular_)/, ''),
+          title: item.name,
+          type: item.category === 'ingredient' ? 'ingredient' :
+                item.category === 'product' ? 'product' :
+                item.category === 'recipe' ? 'recipe' : 'food',
+          brandOwner: item.brand,
+          // Recipe-specific properties
+          ...(isRecipe && {
+            readyInMinutes: item.metadata?.readyInMinutes,
+            healthScore: item.metadata?.healthScore,
+            servings: item.nutrition.servingSize ? parseInt(item.nutrition.servingSize) : undefined
+          }),
+          nutrition: {
+            per_serving: {
+              calories: item.nutrition.per100g.calories,
+              protein: item.nutrition.per100g.protein,
+              carbs: item.nutrition.per100g.carbs,
+              fat: item.nutrition.per100g.fat,
+              fiber: item.nutrition.per100g.fiber,
+            }
+          },
+          metadata: {
+            searchRelevance: item.metadata.confidence,
+            lastUpdated: item.source.lastUpdated,
+            tags: [item.source.api]
+          }
+        };
+        await addToFavorites(unifiedItem, 'starred');
+      }
     };
 
     return (
@@ -618,15 +805,33 @@ export default function SearchScreen() {
         onPress={() => handleFoodItemClick(item)}
       >
         <View style={styles.foodIconContainer}>
-          <Text style={styles.foodIcon}>{item.metadata?.foodIcon || '🍽️'}</Text>
+          <Text style={styles.foodIcon}>
+            {isRecipe ? '👨‍🍳' : (item.metadata?.foodIcon || '🍽️')}
+          </Text>
         </View>
         <View style={styles.foodInfo}>
           <Text style={styles.foodName}>{item.name}</Text>
-          <Text style={styles.foodNutrition}>
-            {Math.round(item.nutrition.per100g.calories || 0)} cal • {Math.round(item.nutrition.per100g.protein || 0)}g protein • {Math.round(item.nutrition.per100g.carbs || 0)}g carbs
-          </Text>
-          <Text style={styles.servingSize}>{item.nutrition.servingSize || '100g'}</Text>
-          <Text style={styles.foodSource}>Source: {item.source.api}</Text>
+          {isRecipe ? (
+            // Recipe-specific display
+            <>
+              <Text style={styles.foodNutrition}>
+                {Math.round(item.nutrition.per100g.calories || 0)} cal per serving
+                {item.metadata?.readyInMinutes && ` • ${item.metadata.readyInMinutes} min`}
+                {item.metadata?.healthScore && ` • ${Math.round(item.metadata.healthScore)}/100 health`}
+              </Text>
+              <Text style={styles.servingSize}>{item.nutrition.servingSize}</Text>
+              <Text style={styles.foodSource}>Recipe • Source: {item.source.api}</Text>
+            </>
+          ) : (
+            // Food/ingredient display
+            <>
+              <Text style={styles.foodNutrition}>
+                {Math.round(item.nutrition.per100g.calories || 0)} cal • {Math.round(item.nutrition.per100g.protein || 0)}g protein • {Math.round(item.nutrition.per100g.carbs || 0)}g carbs
+              </Text>
+              <Text style={styles.servingSize}>{item.nutrition.servingSize || '100g'}</Text>
+              <Text style={styles.foodSource}>Source: {item.source.api}</Text>
+            </>
+          )}
           {item.metadata?.warnings && item.metadata.warnings.length > 0 && (
             <Text style={styles.warningText}>⚠️ {item.metadata.warnings[0]}</Text>
           )}
@@ -691,6 +896,28 @@ export default function SearchScreen() {
     <FloatingChatBubbleWrapper>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
+          {/* Search Mode Toggle */}
+          <View style={styles.searchModeContainer}>
+            <TouchableOpacity
+              style={[styles.searchModeButton, searchMode === 'foods' && styles.searchModeButtonActive]}
+              onPress={() => setSearchMode('foods')}
+            >
+              <Ionicons name="nutrition-outline" size={16} color={searchMode === 'foods' ? '#FFFFFF' : '#6B7280'} />
+              <Text style={[styles.searchModeText, searchMode === 'foods' && styles.searchModeTextActive]}>
+                Foods
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.searchModeButton, searchMode === 'recipes' && styles.searchModeButtonActive]}
+              onPress={() => setSearchMode('recipes')}
+            >
+              <Ionicons name="restaurant-outline" size={16} color={searchMode === 'recipes' ? '#FFFFFF' : '#6B7280'} />
+              <Text style={[styles.searchModeText, searchMode === 'recipes' && styles.searchModeTextActive]}>
+                Recipes
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.searchContainer}>
             <TouchableOpacity style={styles.barcodeButton} onPress={openBarcodeScanner}>
               <Ionicons name="barcode-outline" size={20} color="#6B7280" />
@@ -698,7 +925,7 @@ export default function SearchScreen() {
             <View style={styles.searchInputContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search foods..."
+                placeholder={searchMode === 'foods' ? 'Search foods...' : 'Search recipes...'}
                 placeholderTextColor="#9CA3AF"
                 value={currentQuery}
                 onChangeText={(text) => {
@@ -770,8 +997,15 @@ export default function SearchScreen() {
 
                   {currentQuery === '' && (
                     <View style={styles.emptyContainer}>
-                      <Text style={styles.emptyText}>Start typing to search for foods</Text>
-                      <Text style={styles.emptySubtext}>Search for ingredients, products, or use the barcode scanner</Text>
+                      <Text style={styles.emptyText}>
+                        Start typing to search for {searchMode === 'foods' ? 'foods' : 'recipes'}
+                      </Text>
+                      <Text style={styles.emptySubtext}>
+                        {searchMode === 'foods'
+                          ? 'Search for ingredients, products, or use the barcode scanner'
+                          : 'Search for recipes by name, ingredients, or cuisine type'
+                        }
+                      </Text>
                     </View>
                   )}
 
@@ -844,6 +1078,33 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+  },
+  searchModeContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: 12,
+    alignSelf: 'center',
+  },
+  searchModeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    gap: 6,
+  },
+  searchModeButtonActive: {
+    backgroundColor: '#3B82F6',
+  },
+  searchModeText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  searchModeTextActive: {
+    color: '#FFFFFF',
   },
   searchContainer: {
     flexDirection: 'row',

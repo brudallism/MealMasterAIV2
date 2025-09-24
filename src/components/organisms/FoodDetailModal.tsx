@@ -13,14 +13,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { FoodLookupResult } from '../../services/api/types';
+import { UnifiedMealItem } from '../../types/unified-meal-item';
 import MacroNutritionDisplay from '@/components/molecules/MacroNutritionDisplay';
 import { useMicronutrientsStore } from '../../stores/micronutrients-store';
 
 interface FoodDetailModalProps {
   visible: boolean;
-  food: FoodLookupResult | null;
+  food: UnifiedMealItem | null;
   onClose: () => void;
-  onAddToMeal: (food: FoodLookupResult, quantity: number, unit: string) => void;
+  onAddToMeal: (food: UnifiedMealItem, quantity: number, unit: string) => void;
 }
 
 const FoodDetailModal: React.FC<FoodDetailModalProps> = ({
@@ -61,7 +62,7 @@ const FoodDetailModal: React.FC<FoodDetailModalProps> = ({
 
   React.useEffect(() => {
     if (food) {
-      setSelectedUnit(food.nutrition.servingSize || '100g');
+      setSelectedUnit('100g'); // UnifiedMealItem always uses per_serving basis
       setQuantity('1');
     }
   }, [food]);
@@ -103,11 +104,11 @@ const FoodDetailModal: React.FC<FoodDetailModalProps> = ({
     }
 
     return {
-      calories: Math.round((food.nutrition.per100g.calories || 0) * conversionFactor),
-      protein: Math.round((food.nutrition.per100g.protein || 0) * conversionFactor * 10) / 10,
-      carbs: Math.round((food.nutrition.per100g.carbs || 0) * conversionFactor * 10) / 10,
-      fat: Math.round((food.nutrition.per100g.fat || 0) * conversionFactor * 10) / 10,
-      fiber: Math.round((food.nutrition.per100g.fiber || 0) * conversionFactor * 10) / 10,
+      calories: Math.round((food.nutrition?.per_serving.calories || 0) * conversionFactor),
+      protein: Math.round((food.nutrition?.per_serving.protein || 0) * conversionFactor * 10) / 10,
+      carbs: Math.round((food.nutrition?.per_serving.carbs || 0) * conversionFactor * 10) / 10,
+      fat: Math.round((food.nutrition?.per_serving.fat || 0) * conversionFactor * 10) / 10,
+      fiber: Math.round((food.nutrition?.per_serving.fiber || 0) * conversionFactor * 10) / 10,
     };
   };
 
@@ -118,47 +119,14 @@ const FoodDetailModal: React.FC<FoodDetailModalProps> = ({
 
   // Calculate micronutrients based on user's selection and quantity
   const calculatedMicronutrients = useMemo(() => {
-    if (!food || !food.nutrition.micronutrients) {
+    // UnifiedMealItem doesn't have micronutrients structure like FoodLookupResult
+    // For now, we'll skip micronutrients display until we implement it in the transformation layer
+    if (!food) {
       return [];
     }
 
-    const baseQuantity = parseFloat(quantity) || 1;
-    let conversionFactor = baseQuantity;
-
-    // Apply same unit conversion logic as main nutrition
-    if (selectedUnit === '100g') {
-      conversionFactor = baseQuantity;
-    } else if (selectedUnit === 'g') {
-      conversionFactor = baseQuantity / 100;
-    } else if (selectedUnit === 'serving') {
-      conversionFactor = baseQuantity;
-    } else if (selectedUnit === 'cup') {
-      conversionFactor = (baseQuantity * 240) / 100;
-    } else if (selectedUnit === 'oz') {
-      conversionFactor = (baseQuantity * 28.35) / 100;
-    } else if (selectedUnit === 'tbsp') {
-      conversionFactor = (baseQuantity * 15) / 100;
-    } else if (selectedUnit === 'tsp') {
-      conversionFactor = (baseQuantity * 5) / 100;
-    }
-
-    // Generate micronutrients based on user's selected micronutrients from store
-    return userMicronutrients
-      .map(nutrientInfo => {
-        const foodNutrient = food.nutrition.micronutrients![nutrientInfo.id];
-
-        if (!foodNutrient) {
-          return null; // Skip nutrients not available in this food
-        }
-
-        return {
-          name: nutrientInfo.minimizeFlag ? `⚠️ ${nutrientInfo.name}` : nutrientInfo.name,
-          amount: Math.round(foodNutrient.amount * conversionFactor * 10) / 10,
-          unit: nutrientInfo.unit === 'µg' ? 'mcg' : nutrientInfo.unit, // Convert µg to mcg for display
-          isHarmful: nutrientInfo.minimizeFlag
-        };
-      })
-      .filter(Boolean); // Remove null entries
+    // TODO: Implement micronutrients support in UnifiedMealItem
+    return [];
   }, [food, quantity, selectedUnit, userMicronutrients]);
 
   if (!food) return null;
@@ -184,12 +152,12 @@ const FoodDetailModal: React.FC<FoodDetailModalProps> = ({
               <Text style={styles.foodIcon}>{food.metadata?.foodIcon || '🍽️'}</Text>
             </View>
             <View style={styles.foodInfo}>
-              <Text style={styles.foodName}>{food.name}</Text>
-              {food.brand && (
-                <Text style={styles.brandName}>{food.brand}</Text>
+              <Text style={styles.foodName}>{food.title}</Text>
+              {food.brandOwner && (
+                <Text style={styles.brandName}>{food.brandOwner}</Text>
               )}
-              <Text style={styles.categoryText}>{food.category}</Text>
-              <Text style={styles.sourceText}>Source: {food.source.api.toUpperCase()}</Text>
+              <Text style={styles.categoryText}>{food.type}</Text>
+              <Text style={styles.sourceText}>Source: {food.source.toUpperCase()}</Text>
             </View>
           </View>
 
@@ -259,13 +227,13 @@ const FoodDetailModal: React.FC<FoodDetailModalProps> = ({
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Base Nutrition (per 100g)</Text>
+            <Text style={styles.sectionTitle}>Base Nutrition (per serving)</Text>
             <View style={styles.baseNutritionRow}>
               <Text style={styles.baseNutritionText}>
-                {Math.round(food.nutrition.per100g.calories || 0)} cal •{' '}
-                {Math.round(food.nutrition.per100g.protein || 0)}g protein •{' '}
-                {Math.round(food.nutrition.per100g.carbs || 0)}g carbs •{' '}
-                {Math.round(food.nutrition.per100g.fat || 0)}g fat
+                {Math.round(food.nutrition?.per_serving.calories || 0)} cal •{' '}
+                {Math.round(food.nutrition?.per_serving.protein || 0)}g protein •{' '}
+                {Math.round(food.nutrition?.per_serving.carbs || 0)}g carbs •{' '}
+                {Math.round(food.nutrition?.per_serving.fat || 0)}g fat
               </Text>
             </View>
           </View>
@@ -323,16 +291,7 @@ const FoodDetailModal: React.FC<FoodDetailModalProps> = ({
             </View>
           )}
 
-          {food.metadata?.warnings && food.metadata.warnings.length > 0 && (
-            <View style={styles.warningSection}>
-              <Text style={styles.warningTitle}>⚠️ Warnings</Text>
-              {food.metadata.warnings.map((warning, index) => (
-                <Text key={index} style={styles.warningText}>
-                  • {warning}
-                </Text>
-              ))}
-            </View>
-          )}
+          {/* TODO: Implement warnings display for UnifiedMealItem if needed */}
         </ScrollView>
 
         <View style={styles.footer}>

@@ -1,0 +1,227 @@
+{
+  "extraction_type": "working_usda_system",
+  "extraction_date": "2025-09-23",
+  "source_commit": "5257a52 (before reset to e062b86)",
+  "purpose": "Preserve working USDA food search system for restoration after transformation layer implementation",
+
+  "core_usda_functionality": {
+    "search_logic": {
+      "file": "src/screens/SearchScreen.tsx",
+      "key_functions": [
+        "handleSearch(query) - Main USDA search logic",
+        "generateSmartQueries(baseQuery) - Smart cooked/raw variants",
+        "deduplicateResults(results) - Remove duplicates",
+        "rankResults(results) - Foundation food prioritization"
+      ],
+      "smart_search_features": [
+        "Cooked/raw variations for simple ingredients",
+        "Foundation food prioritization",
+        "Duplicate removal with confidence scoring",
+        "Category-based result organization"
+      ]
+    },
+
+    "usda_api_client": {
+      "base_url": "https://api.nal.usda.gov/fdc/v1/",
+      "key_endpoints": [
+        "foods/search - Main search endpoint",
+        "food/{fdcId} - Individual food details"
+      ],
+      "search_parameters": {
+        "query": "User search term with smart variations",
+        "dataType": "Foundation,SR Legacy,Branded",
+        "pageSize": 50,
+        "pageNumber": 1,
+        "sortBy": "dataType.keyword",
+        "sortOrder": "asc"
+      }
+    },
+
+    "nutrient_extraction": {
+      "function": "extractNutrient(nutrients, nutrientId)",
+      "key_nutrients": {
+        "208": "Energy (calories)",
+        "203": "Protein",
+        "205": "Carbs",
+        "204": "Total lipid (fat)",
+        "291": "Fiber"
+      },
+      "conversion_logic": "Handle per 100g nutrition data to serving sizes"
+    },
+
+    "data_structures": {
+      "FoodLookupResult": {
+        "id": "string (fdcId)",
+        "name": "string",
+        "brand": "string (optional)",
+        "category": "string",
+        "nutrition": "FoodNutrition object",
+        "source": "FoodSource object",
+        "metadata": "FoodMetadata object"
+      },
+      "search_result_organization": {
+        "ingredients": "Foundation foods",
+        "products": "Branded foods",
+        "recipes": "SR Legacy complex foods"
+      }
+    },
+
+    "food_detail_modal": {
+      "file": "src/components/organisms/FoodDetailModal.tsx",
+      "key_features": [
+        "Nutrition display with per 100g and serving size",
+        "Add to cart with portion selection",
+        "Star/favorite functionality",
+        "Brand and category information"
+      ]
+    },
+
+    "cart_integration": {
+      "file": "src/stores/cart-store.ts",
+      "key_features": [
+        "addToCart(foodItem, portion)",
+        "Cart item counting and display",
+        "Meal basket modal integration"
+      ]
+    },
+
+    "favorites_system": {
+      "file": "src/stores/search-store.ts",
+      "functions": [
+        "toggleStarred(mealItem) - Add/remove favorites",
+        "isStarred(foodId) - Check favorite status",
+        "getStarredByCategory() - Get favorites list"
+      ],
+      "data_structure": "Array of MealItem objects with food property"
+    }
+  },
+
+  "working_patterns_to_preserve": {
+    "search_flow": [
+      "1. User types query in SearchScreen",
+      "2. Debounced search triggers handleSearch()",
+      "3. Smart query variations generated",
+      "4. USDA API called with search params",
+      "5. Results processed and ranked",
+      "6. Organized into ingredients/products/recipes",
+      "7. Rendered in FlatList with renderFoodItem"
+    ],
+
+    "food_selection_flow": [
+      "1. User taps food item in search results",
+      "2. FoodDetailModal opens with full nutrition info",
+      "3. User can star food or add to cart",
+      "4. Modal closes, returns to search results"
+    ],
+
+    "rendering_patterns": {
+      "renderFoodItem": "Displays food name, brand, category with star button",
+      "renderSection": "Organizes foods by type (ingredients/products/recipes)",
+      "tab_system": "Search/Recents/Favorites with getTabData()"
+    }
+  },
+
+  "integration_notes_for_transformation_layer": {
+    "id_handling": "USDA already uses string IDs (fdcId) - no conversion needed",
+    "nutrition_mapping": "Map FoodNutrition.per100g to UnifiedNutrition.per_serving",
+    "category_mapping": "Map USDA categories to UnifiedItemType (food/product/ingredient)",
+    "favorites_migration": "Convert starredFoods MealItem[] to UnifiedFavoriteItem[]",
+    "search_integration": "Wrap handleSearch() in unifiedSearchService.searchFoods()"
+  },
+
+  "restoration_strategy": {
+    "step_1": "Implement UnifiedMealItem and USDATransformer first",
+    "step_2": "Restore handleSearch() logic but return UnifiedMealItem[]",
+    "step_3": "Update FoodDetailModal to accept UnifiedMealItem",
+    "step_4": "Migrate favorites system to unified store",
+    "step_5": "Update rendering to use unified data structures"
+  },
+
+  "validation_checklist": [
+    "Food search returns same quality results as current system",
+    "Smart query variations (cooked/raw) still work",
+    "Foundation food prioritization preserved",
+    "Nutrition extraction accuracy maintained",
+    "Food detail modal displays correctly",
+    "Cart integration functions properly",
+    "Favorites system works with string IDs",
+    "No React hooks violations during search"
+  ],
+
+  "api_client_details": {
+    "file": "src/services/api/usda-client.ts",
+    "class": "USDAClient",
+    "base_url": "https://api.nal.usda.gov/fdc/v1",
+    "key_methods": {
+      "searchFoods(query)": "Main search endpoint with pageSize=10",
+      "getFoodDetails(fdcId)": "Individual food detail lookup"
+    },
+    "api_key_source": "Constants.expoConfig?.extra?.EXPO_PUBLIC_USDA_API_KEY",
+    "error_handling": "Console logging with throw on errors"
+  },
+
+  "food_detail_modal_structure": {
+    "file": "src/components/organisms/FoodDetailModal.tsx",
+    "props_interface": "FoodDetailModalProps",
+    "key_features": {
+      "nutrition_display": "MacroNutritionDisplay component with calculated values",
+      "serving_controls": "Quantity input + unit selector (100g, g, serving, cup, oz, etc)",
+      "unit_conversions": "Basic conversions to 100g base with conversion factors",
+      "micronutrients": "User-configurable display from micronutrients-store",
+      "add_to_meal": "onAddToMeal callback with food, quantity, unit",
+      "real_time_calculations": "Updates nutrition as user changes quantity/unit"
+    },
+    "state_management": [
+      "quantity: string (default '1')",
+      "selectedUnit: string (default '100g')",
+      "showMicronutrients: boolean",
+      "showUnitPicker: boolean"
+    ]
+  },
+
+  "cart_system_architecture": {
+    "file": "src/stores/cart-store.ts",
+    "store_name": "useCart",
+    "storage_key": "@mealmaster_cart",
+    "key_interfaces": {
+      "CartItem": "{ food: MealItem, quantity: number, unit: string, addedAt: string }",
+      "CartState": "Complete cart state with items, visibility, totals, actions"
+    },
+    "core_functions": {
+      "addToCart": "Handles both MealItem and FoodLookupResult, auto-converts",
+      "removeFromCart": "Removes by foodId, recalculates totals",
+      "updateQuantity": "Updates quantity, recalculates nutrition",
+      "calculateNutritionForQuantity": "Unit conversion logic for nutrition math",
+      "createMealFromCart": "Combines all cart items into single meal entry"
+    },
+    "unit_conversions": {
+      "100g": "baseQuantity * 1",
+      "g": "baseQuantity / 100",
+      "cup": "(baseQuantity * 240) / 100",
+      "oz": "(baseQuantity * 28.35) / 100",
+      "serving": "baseQuantity * 1 (assumes 100g serving)"
+    },
+    "persistence": "AsyncStorage with auto-save on every action"
+  },
+
+  "search_rendering_patterns": {
+    "main_search_function": "handleSearch() in SearchScreen.tsx",
+    "result_optimization": "optimizeResults() - Foundation foods first, cooked/raw variants",
+    "data_organization": {
+      "ingredients": "Foundation foods (dataType === 'Foundation')",
+      "products": "Branded foods",
+      "recipes": "SR Legacy complex foods"
+    },
+    "rendering_structure": {
+      "SectionList": "Organized by food type sections",
+      "renderFoodItem": "Individual food item with star button",
+      "renderSection": "Section headers for organization",
+      "tab_system": "Search/Recents/Favorites with getTabData()"
+    },
+    "smart_search_logic": {
+      "cookable_ingredients": ["rice", "quinoa", "oats", "pasta", "beans", "lentils", "potatoes"],
+      "cooked_variants_priority": "raw first, then cooked, then neutral Foundation foods",
+      "result_limits": "12 total results, 3 Foundation foods max for non-cookable"
+    }
+  }
+}
