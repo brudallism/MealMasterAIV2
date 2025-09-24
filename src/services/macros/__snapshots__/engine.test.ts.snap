@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Macro Engine Snapshot Tests should generate stable output for femaleMetric with maintenance: femaleMetric-maintenance 1`] = `
+{
+  "carb_g": 245,
+  "fat_g": 63,
+  "fiber_g": 29,
+  "kcal_target": 2046,
+  "protein_g": 126,
+}
+`;
+
+exports[`Macro Engine Snapshot Tests should generate stable output for femaleMetric with muscle_gain: femaleMetric-muscle_gain 1`] = `
+{
+  "carb_g": 271,
+  "fat_g": 67,
+  "fiber_g": 31,
+  "kcal_target": 2190,
+  "protein_g": 126,
+}
+`;
+
+exports[`Macro Engine Snapshot Tests should generate stable output for femaleMetric with weight_loss: femaleMetric-weight_loss 1`] = `
+{
+  "carb_g": 201,
+  "fat_g": 49,
+  "fiber_g": 24,
+  "kcal_target": 1746,
+  "protein_g": 126,
+}
+`;
+
+exports[`Macro Engine Snapshot Tests should generate stable output for highBMI with maintenance: highBMI-maintenance 1`] = `
+{
+  "carb_g": 370,
+  "fat_g": 88,
+  "fiber_g": 40,
+  "kcal_target": 2886,
+  "protein_g": 153,
+}
+`;
+
+exports[`Macro Engine Snapshot Tests should generate stable output for highBMI with muscle_gain: highBMI-muscle_gain 1`] = `
+{
+  "carb_g": 407,
+  "fat_g": 94,
+  "fiber_g": 43,
+  "kcal_target": 3088,
+  "protein_g": 153,
+}
+`;
+
+exports[`Macro Engine Snapshot Tests should generate stable output for highBMI with weight_loss: highBMI-weight_loss 1`] = `
+{
+  "carb_g": 276,
+  "fat_g": 69,
+  "fiber_g": 35,
+  "kcal_target": 2486,
+  "protein_g": 190,
+}
+`;
+
+exports[`Macro Engine Snapshot Tests should generate stable output for maleImperial with maintenance: maleImperial-maintenance 1`] = `
+{
+  "carb_g": 411,
+  "fat_g": 93,
+  "fiber_g": 42,
+  "kcal_target": 3032,
+  "protein_g": 139,
+}
+`;
+
+exports[`Macro Engine Snapshot Tests should generate stable output for maleImperial with muscle_gain: maleImperial-muscle_gain 1`] = `
+{
+  "carb_g": 449,
+  "fat_g": 99,
+  "fiber_g": 45,
+  "kcal_target": 3244,
+  "protein_g": 139,
+}
+`;
+
+exports[`Macro Engine Snapshot Tests should generate stable output for maleImperial with weight_loss: maleImperial-weight_loss 1`] = `
+{
+  "carb_g": 323,
+  "fat_g": 73,
+  "fiber_g": 37,
+  "kcal_target": 2632,
+  "protein_g": 171,
+}
+`;

@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CartItem, MealItem, FoodLookupResult } from '../services/api/types';
+import { foodDensityManager } from '@/services/macros/food-density-manager';
 
 interface CartState {
   // Cart items
@@ -60,34 +61,31 @@ const convertFoodLookupToMealItem = (food: FoodLookupResult): MealItem => {
   };
 };
 
-// Helper function to calculate nutrition for a specific quantity and unit
+// Helper function to calculate nutrition for a specific quantity and unit using food-density aware conversions
 const calculateNutritionForQuantity = (food: MealItem, quantity: number, unit: string) => {
-  // For now, we'll use a simple conversion assuming the base nutrition is per 100g
-  // In a real app, you'd want more sophisticated unit conversions
-  let conversionFactor = quantity;
+  // Use food-density manager for accurate conversions
+  const conversionResult = foodDensityManager.convertToGrams(
+    quantity,
+    unit,
+    food.id, // foodId
+    food.name, // foodName
+    food.category // category
+  );
 
-  // Basic unit conversions (expand this as needed)
-  if (unit === '100g' || unit === 'per 100g') {
-    conversionFactor = quantity;
-  } else if (unit === 'g' || unit === 'grams') {
-    conversionFactor = quantity / 100;
-  } else if (unit === 'serving' || unit === 'servings') {
-    // Assume 1 serving = 100g for now
-    conversionFactor = quantity;
-  } else if (unit === 'cup' || unit === 'cups') {
-    // Assume 1 cup = 240g for now
-    conversionFactor = (quantity * 240) / 100;
-  } else if (unit === 'oz' || unit === 'ounces') {
-    // 1 oz = 28.35g
-    conversionFactor = (quantity * 28.35) / 100;
+  // Convert from per-100g nutrition to actual grams
+  const conversionFactor = conversionResult.grams / 100;
+
+  // Log conversion confidence if low
+  if (conversionResult.confidence < 0.7) {
+    console.warn(`Low confidence (${Math.round(conversionResult.confidence * 100)}%) unit conversion for ${food.name}: ${quantity} ${unit} → ${conversionResult.grams.toFixed(1)}g (method: ${conversionResult.method})`);
   }
 
   return {
-    calories: (food.calories || 0) * conversionFactor,
-    protein: (food.protein || 0) * conversionFactor,
-    carbs: (food.carbs || 0) * conversionFactor,
-    fat: (food.fat || 0) * conversionFactor,
-    fiber: (food.fiber || 0) * conversionFactor,
+    calories: Math.round((food.calories || 0) * conversionFactor),
+    protein: Math.round((food.protein || 0) * conversionFactor * 10) / 10, // 1 decimal precision
+    carbs: Math.round((food.carbs || 0) * conversionFactor * 10) / 10,
+    fat: Math.round((food.fat || 0) * conversionFactor * 10) / 10,
+    fiber: Math.round((food.fiber || 0) * conversionFactor * 10) / 10,
   };
 };
 

@@ -37,6 +37,11 @@ const SettingsScreen: React.FC = () => {
   const { user, updateProfile, setGoals } = useUserStore();
   const { getOrderedDisplayList } = useMicronutrientsStore();
 
+  // Unit system state
+  const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>(
+    user?.preferred_units || 'metric'
+  );
+
   const [profile, setProfile] = useState<UserProfile>({
     name: user?.name || '',
     age: user?.age?.toString() || '',
@@ -50,6 +55,56 @@ const SettingsScreen: React.FC = () => {
       fat: '',
     },
   });
+
+  // Convert weight display based on unit system
+  const getWeightDisplay = () => {
+    if (unitSystem === 'imperial') {
+      const weightKg = parseFloat(profile.weight) || 0;
+      const weightLbs = Math.round(weightKg * 2.20462);
+      return weightLbs.toString();
+    }
+    return profile.weight;
+  };
+
+  // Convert height display based on unit system
+  const getHeightDisplay = () => {
+    if (unitSystem === 'imperial') {
+      const heightCm = parseFloat(profile.height) || 0;
+      const totalInches = Math.round(heightCm / 2.54);
+      const feet = Math.floor(totalInches / 12);
+      const inches = totalInches % 12;
+      return `${feet}'${inches}"`;
+    }
+    return profile.height;
+  };
+
+  // Handle weight input change with unit conversion
+  const handleWeightChange = (text: string) => {
+    if (unitSystem === 'imperial') {
+      const weightLbs = parseFloat(text) || 0;
+      const weightKg = Math.round((weightLbs / 2.20462) * 10) / 10;
+      setProfile(prev => ({ ...prev, weight: weightKg.toString() }));
+    } else {
+      setProfile(prev => ({ ...prev, weight: text }));
+    }
+  };
+
+  // Handle height input change with unit conversion
+  const handleHeightChange = (text: string) => {
+    if (unitSystem === 'imperial') {
+      // Parse feet'inches" format
+      const match = text.match(/(\d+)'(\d+)"/);
+      if (match) {
+        const feet = parseInt(match[1]);
+        const inches = parseInt(match[2]);
+        const totalInches = feet * 12 + inches;
+        const heightCm = Math.round(totalInches * 2.54);
+        setProfile(prev => ({ ...prev, height: heightCm.toString() }));
+      }
+    } else {
+      setProfile(prev => ({ ...prev, height: text }));
+    }
+  };
 
   const [isManualMacros, setIsManualMacros] = useState(false);
 
@@ -114,12 +169,13 @@ const SettingsScreen: React.FC = () => {
       return;
     }
 
-    // Update user profile
+    // Update user profile including unit preference
     const updatedUser = {
       name: profile.name.trim(),
       age: parseInt(profile.age) || undefined,
       weight: parseFloat(profile.weight) || undefined,
       height: parseFloat(profile.height) || undefined,
+      preferred_units: unitSystem,
     };
 
     updateProfile(updatedUser);
@@ -178,6 +234,45 @@ const SettingsScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Unit System Toggle */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Unit System</Text>
+          <View style={styles.unitToggleContainer}>
+            <TouchableOpacity
+              style={[
+                styles.unitToggle,
+                unitSystem === 'metric' && styles.unitToggleActive,
+              ]}
+              onPress={() => setUnitSystem('metric')}
+            >
+              <Text
+                style={[
+                  styles.unitToggleText,
+                  unitSystem === 'metric' && styles.unitToggleTextActive,
+                ]}
+              >
+                Metric (kg, cm)
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.unitToggle,
+                unitSystem === 'imperial' && styles.unitToggleActive,
+              ]}
+              onPress={() => setUnitSystem('imperial')}
+            >
+              <Text
+                style={[
+                  styles.unitToggleText,
+                  unitSystem === 'imperial' && styles.unitToggleTextActive,
+                ]}
+              >
+                Imperial (lbs, ft/in)
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Basic Information */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Basic Information</Text>
@@ -206,12 +301,14 @@ const SettingsScreen: React.FC = () => {
               />
             </View>
             <View style={[styles.inputGroup, { flex: 1, marginLeft: 12 }]}>
-              <Text style={styles.inputLabel}>Weight (kg)</Text>
+              <Text style={styles.inputLabel}>
+                Weight ({unitSystem === 'imperial' ? 'lbs' : 'kg'})
+              </Text>
               <TextInput
                 style={styles.textInput}
-                value={profile.weight}
-                onChangeText={(text) => setProfile(prev => ({ ...prev, weight: text }))}
-                placeholder="70"
+                value={getWeightDisplay()}
+                onChangeText={handleWeightChange}
+                placeholder={unitSystem === 'imperial' ? '154' : '70'}
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
               />
@@ -219,14 +316,16 @@ const SettingsScreen: React.FC = () => {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Height (cm)</Text>
+            <Text style={styles.inputLabel}>
+              Height ({unitSystem === 'imperial' ? 'ft\'in"' : 'cm'})
+            </Text>
             <TextInput
               style={styles.textInput}
-              value={profile.height}
-              onChangeText={(text) => setProfile(prev => ({ ...prev, height: text }))}
-              placeholder="175"
+              value={getHeightDisplay()}
+              onChangeText={handleHeightChange}
+              placeholder={unitSystem === 'imperial' ? '5\'9"' : '175'}
               placeholderTextColor="#9CA3AF"
-              keyboardType="numeric"
+              keyboardType={unitSystem === 'imperial' ? 'default' : 'numeric'}
             />
           </View>
         </View>
@@ -627,6 +726,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#111827',
     fontWeight: '500',
+  },
+  // Unit toggle styles
+  unitToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    padding: 4,
+  },
+  unitToggle: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unitToggleActive: {
+    backgroundColor: '#4F46E5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  unitToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  unitToggleTextActive: {
+    color: '#FFFFFF',
   },
   micronutrientUnit: {
     fontSize: 12,
